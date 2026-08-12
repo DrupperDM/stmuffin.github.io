@@ -30,5 +30,14 @@ const POSTS = [
     tags: ["universidad"],
     excerpt: "Algunas cosas que aprendí (a las malas) sobre organizarme, entregar proyectos y no dormir solo 3 horas antes de un examen.",
     content: "El primer semestre fue una montaña rusa. Entre materias que no sabía que existían y proyectos que aparecían de la nada, terminé aprendiendo más sobre organizarme que sobre código.\n\nAlgunas cosas que me sirvieron:\n\n- Anotar TODO, aunque sienta que me voy a acordar\n- Empezar los proyectos apenas los asignan, no la semana antes\n- Aceptar que un error de sintaxis me va a robar 40 minutos de vida tarde o temprano\n\nY sí, dormí muy poco antes de más de un examen. Trabajando en eso."
-  }
+  },
+    {
+    slug: "fin-de-cubikasmp-temporada-3-muchas-gracias-por-jugar",
+    title: "FIN DE CUBIKASMP TEMPORADA 3 - MUCHAS GRACIAS POR JUGAR",
+    date: "2026-07-28",
+    tags: ["cubikasmp t3"],
+    cover: "https://imgur.com/a/AxCXE2S",
+    excerpt: "CUBIKASMP T3",
+    content: "Escribo este post para anunciar el cierre de CubikaSMP TEMPORADA 3, fue una temporada de pruebas y risas, y aunque tuvo sus momentos incomodos, se logró sobrellevar el servidor y se vivieron momentos increibles, gracias por todo."
+  },
 ];
