@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Nueva entrada — TU NOMBRE</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="stars"></div>
+
+<nav>
+  <a href="index.html" class="nav-logo">TU<span class="heart">♥</span>NOMBRE</a>
+  <ul class="nav-links">
+    <li><a href="index.html#inicio">INICIO</a></li>
+    <li><a href="blog.html">BLOG</a></li>
+  </ul>
+</nav>
+
+<header class="page-header">
+  <h1>* NUEVA ENTRADA</h1>
+  <p>Esta página es solo para ti: arma tu post, genera el bloque de código y pégalo en posts-data.js.</p>
+</header>
+
+<div class="form-wrap">
+
+  <div class="notice">
+    <strong>Cómo funciona:</strong> como el sitio vive en GitHub Pages, no hay
+    un servidor detrás que guarde nada por ti. Esta herramienta arma el
+    objeto del post por ti — tú lo copias, lo pegas dentro del arreglo
+    <code>POSTS</code> en <code>posts-data.js</code>, guardas y subes el
+    cambio a GitHub. Así aparece en el blog.
+  </div>
+
+  <div class="field">
+    <label for="f-title">TÍTULO</label>
+    <input type="text" id="f-title" placeholder="Cómo sobreviví mi primer parcial">
+  </div>
+
+  <div class="field">
+    <label for="f-date">FECHA</label>
+    <input type="date" id="f-date">
+  </div>
+
+  <div class="field">
+    <label for="f-tags">ETIQUETAS (separadas por coma)</label>
+    <input type="text" id="f-tags" placeholder="universidad, codigo, random">
+  </div>
+
+  <div class="field">
+    <label for="f-excerpt">EXTRACTO (resumen corto que se ve en la lista)</label>
+    <textarea id="f-excerpt" placeholder="Una o dos frases sobre de qué trata el post."></textarea>
+  </div>
+
+  <div class="field">
+    <label for="f-content">CONTENIDO</label>
+    <textarea id="f-content" style="min-height:180px;" placeholder="Escribe tu post aquí. Deja una línea en blanco entre párrafos."></textarea>
+    <div class="hint">* separa los párrafos con una línea en blanco — así se van a mostrar como párrafos distintos en el blog.</div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-gold" id="genBtn">GENERAR ENTRADA</button>
+  </div>
+
+  <div id="outputWrap" style="display:none;">
+    <div class="divider" style="margin-bottom:20px;"><span class="mark">◆</span></div>
+
+    <div class="field">
+      <label>VISTA PREVIA</label>
+      <div class="post-card" style="cursor:default;" id="previewCard"></div>
+    </div>
+
+    <div class="field">
+      <label>CÓDIGO PARA PEGAR EN posts-data.js</label>
+      <div class="code-box">
+        <button class="copy-btn" id="copyBtn">COPIAR</button>
+        <pre id="codeOutput"></pre>
+      </div>
+      <div class="hint">* pégalo como un elemento nuevo dentro del arreglo <code>POSTS = [ ... ]</code>, con una coma antes o después del elemento vecino.</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" id="downloadBtn">DESCARGAR .JS</button>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="copy">TU NOMBRE © 2026. Hecho con determinación (y un poco de café).</div>
+</footer>
+
+<script src="stars.js"></script>
+<script>
+function slugify(text){
+  return text
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9\s-]/g,'')
+    .trim()
+    .replace(/\s+/g,'-')
+    .replace(/-+/g,'-');
+}
+
+function formatDate(iso){
+  const d = new Date(iso + 'T00:00:00');
+  const meses = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+  return meses[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+}
+
+function jsStringLiteral(str){
+  return JSON.stringify(str);
+}
+
+document.getElementById('genBtn').addEventListener('click', ()=>{
+  const title = document.getElementById('f-title').value.trim();
+  const dateVal = document.getElementById('f-date').value;
+  const tagsRaw = document.getElementById('f-tags').value.trim();
+  const excerpt = document.getElementById('f-excerpt').value.trim();
+  const content = document.getElementById('f-content').value.trim();
+
+  if(!title || !dateVal || !excerpt || !content){
+    alert('Falta llenar título, fecha, extracto o contenido.');
+    return;
+  }
+
+  const tags = tagsRaw ? tagsRaw.split(',').map(t=>t.trim().toLowerCase()).filter(Boolean) : [];
+  const slug = slugify(title);
+
+  const tagsCode = '[' + tags.map(t => jsStringLiteral(t)).join(', ') + ']';
+  const contentCode = jsStringLiteral(content.replace(/\r\n/g,'\n'));
+
+  const code =
+`  {
+    slug: ${jsStringLiteral(slug)},
+    title: ${jsStringLiteral(title)},
+    date: ${jsStringLiteral(dateVal)},
+    tags: ${tagsCode},
+    excerpt: ${jsStringLiteral(excerpt)},
+    content: ${contentCode}
+  },`;
+
+  document.getElementById('codeOutput').textContent = code;
+
+  document.getElementById('previewCard').innerHTML = `
+    <div class="pc-top">
+      <span class="pc-title">${title}</span>
+      <span class="pc-date">${formatDate(dateVal)}</span>
+    </div>
+    <div class="pc-excerpt">${excerpt}</div>
+    <div class="pc-tags">${tags.map(t=>`<span class="pill">${t}</span>`).join('')}</div>
+  `;
+
+  document.getElementById('outputWrap').style.display = 'block';
+  document.getElementById('outputWrap').scrollIntoView({behavior:'smooth', block:'start'});
+});
+
+document.getElementById('copyBtn').addEventListener('click', ()=>{
+  const text = document.getElementById('codeOutput').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.getElementById('copyBtn');
+    const original = btn.textContent;
+    btn.textContent = 'COPIADO';
+    setTimeout(()=> btn.textContent = original, 1500);
+  });
+});
+
+document.getElementById('downloadBtn').addEventListener('click', ()=>{
+  const title = document.getElementById('f-title').value.trim() || 'nueva-entrada';
+  const code = document.getElementById('codeOutput').textContent;
+  const blob = new Blob([code], {type:'text/javascript'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = slugify(title) + '.js';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+</script>
+
+</body>
+</html>
