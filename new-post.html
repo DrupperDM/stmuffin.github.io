@@ -49,15 +49,60 @@
     <input type="text" id="f-tags" placeholder="universidad, codigo, random">
   </div>
 
+  <!-- ---------- PORTADA ---------- -->
+  <div class="field">
+    <label>IMAGEN DE PORTADA (opcional)</label>
+    <div class="img-picker">
+      <div class="img-tabs">
+        <button type="button" class="img-tab active" data-picker="cover" data-mode="url">PEGAR URL</button>
+        <button type="button" class="img-tab" data-picker="cover" data-mode="file">SUBIR ARCHIVO</button>
+      </div>
+      <div class="img-pane active" data-picker="cover" data-mode="url">
+        <input type="text" id="cover-url" placeholder="https://ejemplo.com/mi-imagen.png">
+      </div>
+      <div class="img-pane" data-picker="cover" data-mode="file">
+        <input type="file" id="cover-file" accept="image/*">
+        <div class="hint">* al subir un archivo, la imagen se guarda directamente dentro de posts-data.js (no necesitas subir el archivo aparte a GitHub). Es más cómodo, pero infla un poco el archivo — para portadas grandes es mejor usar una URL.</div>
+      </div>
+      <div class="img-preview" id="cover-preview"><img id="cover-preview-img" alt=""></div>
+    </div>
+  </div>
+
   <div class="field">
     <label for="f-excerpt">EXTRACTO (resumen corto que se ve en la lista)</label>
     <textarea id="f-excerpt" placeholder="Una o dos frases sobre de qué trata el post."></textarea>
   </div>
 
+  <!-- ---------- CONTENIDO ---------- -->
   <div class="field">
-    <label for="f-content">CONTENIDO</label>
+    <div class="toolbar-row">
+      <label for="f-content">CONTENIDO</label>
+      <button type="button" class="btn" id="toggleImgInsert">+ INSERTAR IMAGEN</button>
+    </div>
     <textarea id="f-content" style="min-height:180px;" placeholder="Escribe tu post aquí. Deja una línea en blanco entre párrafos."></textarea>
-    <div class="hint">* separa los párrafos con una línea en blanco — así se van a mostrar como párrafos distintos en el blog.</div>
+    <div class="hint">* separa los párrafos con una línea en blanco. Para poner una imagen en medio del texto, ubica el cursor donde la quieras y usa el botón "+ INSERTAR IMAGEN" de arriba.</div>
+
+    <div class="img-picker" id="insertPanel" style="display:none; margin-top:14px;">
+      <div class="img-tabs">
+        <button type="button" class="img-tab active" data-picker="insert" data-mode="url">PEGAR URL</button>
+        <button type="button" class="img-tab" data-picker="insert" data-mode="file">SUBIR ARCHIVO</button>
+      </div>
+      <div class="img-pane active" data-picker="insert" data-mode="url">
+        <input type="text" id="insert-url" placeholder="https://ejemplo.com/mi-imagen.png">
+      </div>
+      <div class="img-pane" data-picker="insert" data-mode="file">
+        <input type="file" id="insert-file" accept="image/*">
+      </div>
+      <div class="img-alt-row">
+        <label for="insert-alt">TEXTO ALTERNATIVO (describe la imagen, para accesibilidad)</label>
+        <input type="text" id="insert-alt" placeholder="Captura de mi proyecto corriendo en local">
+      </div>
+      <div class="img-preview" id="insert-preview"><img id="insert-preview-img" alt=""></div>
+      <div class="btn-row" style="margin-top:14px;">
+        <button type="button" class="btn btn-gold" id="insertImgBtn">INSERTAR EN EL TEXTO</button>
+        <button type="button" class="btn" id="cancelInsertBtn">CANCELAR</button>
+      </div>
+    </div>
   </div>
 
   <div class="btn-row">
@@ -114,6 +159,103 @@ function jsStringLiteral(str){
   return JSON.stringify(str);
 }
 
+function fileToDataUrl(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=> resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ---------- generic image picker wiring ---------- */
+let coverSrc = '';
+let insertSrc = '';
+
+function wireImgTabs(pickerName){
+  const tabs = document.querySelectorAll(`.img-tab[data-picker="${pickerName}"]`);
+  const panes = document.querySelectorAll(`.img-pane[data-picker="${pickerName}"]`);
+  tabs.forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      tabs.forEach(t=>t.classList.remove('active'));
+      panes.forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelector(`.img-pane[data-picker="${pickerName}"][data-mode="${tab.dataset.mode}"]`).classList.add('active');
+    });
+  });
+}
+wireImgTabs('cover');
+wireImgTabs('insert');
+
+function showPreview(previewId, src){
+  const wrap = document.getElementById(previewId);
+  const img = document.getElementById(previewId + '-img');
+  if(!src){
+    wrap.classList.remove('show');
+    return;
+  }
+  img.src = src;
+  wrap.classList.add('show');
+}
+
+document.getElementById('cover-url').addEventListener('input', (e)=>{
+  coverSrc = e.target.value.trim();
+  showPreview('cover-preview', coverSrc);
+});
+document.getElementById('cover-file').addEventListener('change', async (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  coverSrc = await fileToDataUrl(file);
+  showPreview('cover-preview', coverSrc);
+});
+
+document.getElementById('insert-url').addEventListener('input', (e)=>{
+  insertSrc = e.target.value.trim();
+  showPreview('insert-preview', insertSrc);
+});
+document.getElementById('insert-file').addEventListener('change', async (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  insertSrc = await fileToDataUrl(file);
+  showPreview('insert-preview', insertSrc);
+});
+
+/* ---------- insert-image panel open/close ---------- */
+const insertPanel = document.getElementById('insertPanel');
+const contentField = document.getElementById('f-content');
+let lastCursorPos = null;
+
+document.getElementById('toggleImgInsert').addEventListener('click', ()=>{
+  lastCursorPos = contentField.selectionStart;
+  insertPanel.style.display = insertPanel.style.display === 'none' ? 'block' : 'none';
+});
+
+document.getElementById('cancelInsertBtn').addEventListener('click', ()=>{
+  insertPanel.style.display = 'none';
+});
+
+document.getElementById('insertImgBtn').addEventListener('click', ()=>{
+  if(!insertSrc){
+    alert('Pega una URL o sube un archivo de imagen primero.');
+    return;
+  }
+  const alt = document.getElementById('insert-alt').value.trim();
+  const snippet = `\n\n![${alt}](${insertSrc})\n\n`;
+  const pos = lastCursorPos !== null ? lastCursorPos : contentField.value.length;
+  const before = contentField.value.slice(0, pos);
+  const after = contentField.value.slice(pos);
+  contentField.value = before + snippet + after;
+
+  document.getElementById('insert-url').value = '';
+  document.getElementById('insert-file').value = '';
+  document.getElementById('insert-alt').value = '';
+  insertSrc = '';
+  showPreview('insert-preview', '');
+  insertPanel.style.display = 'none';
+  contentField.focus();
+});
+
+/* ---------- generate post object ---------- */
 document.getElementById('genBtn').addEventListener('click', ()=>{
   const title = document.getElementById('f-title').value.trim();
   const dateVal = document.getElementById('f-date').value;
@@ -131,26 +273,31 @@ document.getElementById('genBtn').addEventListener('click', ()=>{
 
   const tagsCode = '[' + tags.map(t => jsStringLiteral(t)).join(', ') + ']';
   const contentCode = jsStringLiteral(content.replace(/\r\n/g,'\n'));
+  const coverLine = coverSrc ? `\n    cover: ${jsStringLiteral(coverSrc)},` : '';
 
   const code =
 `  {
     slug: ${jsStringLiteral(slug)},
     title: ${jsStringLiteral(title)},
     date: ${jsStringLiteral(dateVal)},
-    tags: ${tagsCode},
+    tags: ${tagsCode},${coverLine}
     excerpt: ${jsStringLiteral(excerpt)},
     content: ${contentCode}
   },`;
 
   document.getElementById('codeOutput').textContent = code;
 
+  const coverHtml = coverSrc ? `<img class="pc-cover" src="${coverSrc}" alt="">` : '';
   document.getElementById('previewCard').innerHTML = `
-    <div class="pc-top">
-      <span class="pc-title">${title}</span>
-      <span class="pc-date">${formatDate(dateVal)}</span>
+    ${coverHtml}
+    <div class="pc-inner">
+      <div class="pc-top">
+        <span class="pc-title">${title}</span>
+        <span class="pc-date">${formatDate(dateVal)}</span>
+      </div>
+      <div class="pc-excerpt">${excerpt}</div>
+      <div class="pc-tags">${tags.map(t=>`<span class="pill">${t}</span>`).join('')}</div>
     </div>
-    <div class="pc-excerpt">${excerpt}</div>
-    <div class="pc-tags">${tags.map(t=>`<span class="pill">${t}</span>`).join('')}</div>
   `;
 
   document.getElementById('outputWrap').style.display = 'block';
@@ -179,6 +326,9 @@ document.getElementById('downloadBtn').addEventListener('click', ()=>{
   URL.revokeObjectURL(url);
 });
 </script>
+
+</body>
+</html>
 
 </body>
 </html>
