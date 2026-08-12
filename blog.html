@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Blog — TU NOMBRE</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="stars"></div>
+
+<nav>
+  <a href="index.html" class="nav-logo">TU<span class="heart">♥</span>NOMBRE</a>
+  <ul class="nav-links">
+    <li><a href="index.html#inicio">INICIO</a></li>
+    <li><a href="index.html#sobre-mi">SOBRE MÍ</a></li>
+    <li><a href="index.html#proyectos">PROYECTOS</a></li>
+    <li><a href="blog.html" class="active">BLOG</a></li>
+    <li><a href="index.html#contacto">CONTACTO</a></li>
+  </ul>
+</nav>
+
+<header class="page-header">
+  <div class="souls"><div class="soul"></div><div class="soul"></div><div class="soul"></div></div>
+  <h1>* MI BLOG</h1>
+  <p>Aquí voy dejando lo que aprendo, lo que rompo y lo que logro arreglar de vuelta.</p>
+</header>
+
+<div class="blog-toolbar">
+  <div class="tag-filters" id="tagFilters">
+    <button class="tag-btn active" data-tag="all">TODOS</button>
+  </div>
+  <a class="btn btn-gold" href="new-post.html">+ NUEVA ENTRADA</a>
+</div>
+
+<div id="listView">
+  <div class="post-list" id="postList"></div>
+</div>
+
+<div id="detailView" class="post-detail" style="display:none;"></div>
+
+<footer>
+  <div class="copy">TU NOMBRE © 2026. Hecho con determinación (y un poco de café).</div>
+  <div class="rating-box">
+    <div class="r-mark">DT</div>
+    <div class="r-desc">Contenido: determinación<br>Uso intensivo de café y bugs ocasionales</div>
+  </div>
+</footer>
+
+<script src="stars.js"></script>
+<script src="posts-data.js"></script>
+<script>
+const listView = document.getElementById('listView');
+const detailView = document.getElementById('detailView');
+const postList = document.getElementById('postList');
+const tagFilters = document.getElementById('tagFilters');
+
+const sorted = [...POSTS].sort((a,b)=> new Date(b.date) - new Date(a.date));
+
+function formatDate(iso){
+  const d = new Date(iso + 'T00:00:00');
+  const meses = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+  return meses[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+}
+
+function buildTagFilters(){
+  const tags = new Set();
+  sorted.forEach(p => (p.tags||[]).forEach(t => tags.add(t)));
+  tags.forEach(t=>{
+    const b = document.createElement('button');
+    b.className = 'tag-btn';
+    b.dataset.tag = t;
+    b.textContent = t.toUpperCase();
+    tagFilters.appendChild(b);
+  });
+  tagFilters.addEventListener('click', (e)=>{
+    if(e.target.tagName !== 'BUTTON') return;
+    tagFilters.querySelectorAll('.tag-btn').forEach(b=>b.classList.remove('active'));
+    e.target.classList.add('active');
+    renderList(e.target.dataset.tag);
+  });
+}
+
+function renderList(filterTag){
+  postList.innerHTML = '';
+  const items = filterTag && filterTag !== 'all'
+    ? sorted.filter(p => (p.tags||[]).includes(filterTag))
+    : sorted;
+
+  if(items.length === 0){
+    postList.innerHTML = '<div class="empty-note">* no hay entradas con esa etiqueta todavía...</div>';
+    return;
+  }
+
+  items.forEach(post=>{
+    const card = document.createElement('button');
+    card.className = 'post-card';
+    card.innerHTML = `
+      <div class="pc-top">
+        <span class="pc-title">${post.title}</span>
+        <span class="pc-date">${formatDate(post.date)}</span>
+      </div>
+      <div class="pc-excerpt">${post.excerpt}</div>
+      <div class="pc-tags">${(post.tags||[]).map(t=>`<span class="pill">${t}</span>`).join('')}</div>
+    `;
+    card.addEventListener('click', ()=> openPost(post.slug));
+    postList.appendChild(card);
+  });
+}
+
+function openPost(slug){
+  const post = sorted.find(p => p.slug === slug);
+  if(!post) return;
+  location.hash = slug;
+  listView.style.display = 'none';
+  detailView.style.display = 'block';
+  const paragraphs = post.content.split(/\n\s*\n/).map(p => `<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
+  detailView.innerHTML = `
+    <a class="back-link" href="blog.html">&larr; volver al blog</a>
+    <h1>${post.title}</h1>
+    <div class="pd-meta">${formatDate(post.date)}</div>
+    <div class="pd-tags">${(post.tags||[]).map(t=>`<span class="pill">${t}</span>`).join('')}</div>
+    <div class="pd-body">${paragraphs}</div>
+  `;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function closeDetail(){
+  history.replaceState(null,'',location.pathname);
+  detailView.style.display = 'none';
+  listView.style.display = 'block';
+}
+
+detailView.addEventListener('click', (e)=>{
+  if(e.target.classList.contains('back-link')){
+    e.preventDefault();
+    closeDetail();
+  }
+});
+
+buildTagFilters();
+renderList('all');
+
+if(location.hash){
+  openPost(location.hash.slice(1));
+}
+</script>
+
+</body>
+</html>
