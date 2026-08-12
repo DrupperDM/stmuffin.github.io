@@ -5,165 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#000000">
 <title>TU NOMBRE</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
-
-/*
-  DETERMINATION SANS / DETERMINATION MONO
-  ----------------------------------------
-  Recreación hecha por fans de la fuente propietaria de Undertale/Deltarune
-  (creada por Toby Fox). No puedo incrustar el archivo binario aquí porque
-  no tengo forma de verificar un enlace de descarga permanente y con
-  licencia clara desde este entorno.
-
-  Para tener la fuente 100% real:
-  1. Descarga "Determination Sans Web" (dafont.com o fontstruct.com).
-  2. Crea una carpeta "fonts" junto a este index.html.
-  3. Copia ahí los .woff / .woff2 / .ttf.
-  4. Ajusta las rutas de @font-face si el nombre del archivo cambia.
-
-  Sin la fuente, la página cae automáticamente a Press Start 2P
-  (pixel font libre), así que igual se ve bien desde el primer momento.
-*/
-@font-face{
-  font-family:'Determination Sans';
-  src:url('./fonts/DeterminationSansWeb-Regular.woff2') format('woff2'),
-      url('./fonts/DeterminationSansWeb-Regular.woff') format('woff'),
-      url('./fonts/DeterminationSansWeb-Regular.ttf') format('truetype');
-  font-display:swap;
-}
-
-:root{
-  --bg:#000000;
-  --panel:#0a0a0a;
-  --white:#f4f4f4;
-  --dim:#8a8a8a;
-  --gold:#ffcc22;
-  --gold-dim:#7a6212;
-  --border:#e8e8e8;
-  --pixel:'Determination Sans','Press Start 2P',monospace;
-}
-
-*{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
-
-html,body{background:var(--bg);color:var(--white);min-height:100%;}
-
-body{
-  font-family:var(--pixel);
-  font-size:13px;
-  line-height:2;
-  position:relative;
-  overflow-x:hidden;
-}
-
-/* estrellas de fondo */
-#stars{position:fixed;inset:0;z-index:0;pointer-events:none;}
-.star{position:absolute;width:2px;height:2px;background:var(--white);opacity:.4;animation:twinkle 3s infinite ease-in-out;}
-@keyframes twinkle{0%,100%{opacity:.12;}50%{opacity:.8;}}
-
-/* ---------- nav ---------- */
-nav{
-  position:sticky;top:0;z-index:10;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:16px 22px;
-  background:rgba(0,0,0,.92);
-  border-bottom:1px solid var(--border);
-}
-.nav-logo{font-family:var(--pixel);font-size:12px;letter-spacing:1px;color:var(--white);text-decoration:none;}
-.nav-logo .heart{color:#e0413f;}
-.nav-links{display:flex;flex-wrap:wrap;gap:16px;list-style:none;}
-.nav-links a{font-family:var(--pixel);font-size:10px;letter-spacing:.5px;color:var(--dim);text-decoration:none;transition:color .15s;}
-.nav-links a:hover,.nav-links a.active{color:var(--gold);}
-
-/* ---------- hero ---------- */
-.hero{position:relative;z-index:1;text-align:center;padding:70px 18px 40px;}
-.souls{display:flex;justify-content:center;gap:10px;margin-bottom:20px;}
-.soul{width:12px;height:12px;background:var(--gold);clip-path:polygon(50% 100%,0% 38%,20% 0%,50% 22%,80% 0%,100% 38%);animation:pulse 1.6s infinite ease-in-out;}
-.soul:nth-child(2){animation-delay:.2s;}
-.soul:nth-child(3){animation-delay:.4s;}
-@keyframes pulse{0%,100%{transform:scale(1);opacity:.6;}50%{transform:scale(1.25);opacity:1;}}
-
-.hero h1{font-family:var(--pixel);font-size:clamp(20px,6vw,40px);letter-spacing:3px;color:var(--white);text-shadow:4px 4px 0 var(--gold-dim);}
-.hero h1 .heart{color:#e0413f;text-shadow:none;}
-
-.chapter-tag{display:inline-block;margin-top:18px;padding:6px 14px;border:1px solid var(--border);font-size:10px;letter-spacing:1px;color:var(--gold);}
-
-.hero p.tagline{margin-top:20px;font-size:13px;line-height:1.9;color:var(--dim);max-width:440px;margin-left:auto;margin-right:auto;}
-
-.badge-row{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:32px;}
-.badge{display:flex;flex-direction:column;align-items:center;gap:8px;width:78px;padding:12px 4px;border:1px solid var(--border);background:var(--panel);}
-.badge .icon{width:24px;height:24px;border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--gold);}
-.badge span.label{font-size:9px;color:var(--dim);letter-spacing:.5px;text-align:center;}
-
-.scroll-hint{margin-top:50px;font-size:11px;color:var(--dim);animation:bob 1.6s infinite ease-in-out;}
-@keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(6px);}}
-
-/* ---------- divider ---------- */
-.divider{position:relative;z-index:1;display:flex;align-items:center;gap:14px;max-width:640px;margin:0 auto;padding:0 20px;}
-.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--border);}
-.divider .mark{color:var(--gold);font-size:12px;}
-
-/* ---------- section shells ---------- */
-section{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:56px 20px;}
-section h2{font-family:var(--pixel);font-size:clamp(14px,3vw,18px);letter-spacing:1px;color:var(--white);margin-bottom:24px;text-align:center;}
-section h2 .mark{color:var(--gold);}
-
-/* ---------- about ---------- */
-#sobre-mi p{font-size:14px;line-height:1.9;color:var(--white);max-width:600px;margin:0 auto 16px;text-align:center;}
-.quirk-list{list-style:none;max-width:480px;margin:26px auto 0;display:flex;flex-direction:column;gap:12px;}
-.quirk-list li{font-size:12px;line-height:1.7;color:var(--dim);padding-left:18px;position:relative;}
-.quirk-list li::before{content:"-";position:absolute;left:0;color:var(--gold);}
-
-/* ---------- gallery ---------- */
-.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:8px;}
-.card{border:1px solid var(--border);background:var(--panel);overflow:hidden;text-decoration:none;color:inherit;display:block;transition:transform .15s, border-color .15s;}
-.card:hover{transform:translateY(-4px);border-color:var(--gold);}
-.card-thumb{aspect-ratio:16/10;background:repeating-linear-gradient(45deg, #111 0 6px, #0a0a0a 6px 12px);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--dim);letter-spacing:1px;}
-.card-body{padding:14px 16px;}
-.card-body .p-title{font-size:11px;color:var(--white);letter-spacing:.5px;margin-bottom:8px;}
-.card-body .p-desc{font-size:11px;line-height:1.7;color:var(--dim);}
-
-/* ---------- wip / links box ---------- */
-.ribbon-box{position:relative;border:1px solid var(--border);background:var(--panel);padding:36px 26px;text-align:center;overflow:hidden;}
-.ribbon-box::before{content:"WIP";position:absolute;top:14px;left:-38px;transform:rotate(-45deg);background:var(--gold);color:#221a02;font-size:8px;letter-spacing:1px;padding:5px 44px;}
-.ribbon-box h3{font-size:15px;letter-spacing:1px;margin-bottom:14px;}
-.ribbon-box p{font-size:12px;line-height:1.8;color:var(--dim);max-width:440px;margin:0 auto 24px;}
-.btn-row{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;}
-.btn{font-size:10px;letter-spacing:.5px;color:var(--white);border:1px solid var(--border);padding:12px 16px;text-decoration:none;display:inline-block;transition:border-color .15s, color .15s;}
-.btn:hover{border-color:var(--gold);color:var(--gold);}
-
-/* ---------- timeline ---------- */
-.timeline{display:flex;flex-direction:column;gap:0;margin-top:8px;}
-.tl-item{display:flex;gap:18px;padding:16px 0;border-bottom:1px solid #1c1c1c;}
-.tl-item:last-child{border-bottom:none;}
-.tl-date{font-size:9px;color:var(--gold);min-width:64px;padding-top:4px;}
-.tl-text .tl-title{font-size:12px;line-height:1.6;color:var(--white);margin-bottom:6px;}
-.tl-text .tl-sub{font-size:11px;line-height:1.6;color:var(--dim);}
-
-/* ---------- contact ---------- */
-.contact-lead{text-align:center;font-size:12px;line-height:1.8;color:var(--dim);max-width:440px;margin:0 auto 28px;}
-.contact-form{display:flex;gap:0;max-width:420px;margin:0 auto;border:1px solid var(--border);}
-.contact-form input{flex:1;background:transparent;border:none;outline:none;color:var(--white);font-family:var(--pixel);font-size:11px;padding:14px 14px;}
-.contact-form input::placeholder{color:var(--dim);}
-.contact-form button{background:var(--gold);border:none;color:#221a02;font-family:var(--pixel);font-size:9px;letter-spacing:.5px;padding:0 18px;cursor:pointer;}
-
-.social-row{display:flex;justify-content:center;gap:12px;margin-top:28px;}
-.social-row a{width:40px;height:40px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--dim);text-decoration:none;transition:color .15s, border-color .15s;}
-.social-row a:hover{color:var(--gold);border-color:var(--gold);}
-
-/* ---------- footer ---------- */
-footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32px 20px 44px;text-align:center;}
-footer .copy{font-size:10px;color:var(--dim);letter-spacing:.5px;line-height:1.7;}
-.rating-box{display:inline-flex;align-items:center;gap:10px;margin-top:18px;border:1px solid var(--border);padding:8px 12px;}
-.rating-box .r-mark{font-size:11px;color:var(--gold);border:1px solid var(--gold);padding:4px 7px;}
-.rating-box .r-desc{font-size:9px;line-height:1.6;color:var(--dim);text-align:left;}
-
-@media (max-width:560px){
-  nav{flex-direction:column;gap:10px;padding:12px 16px;}
-  .nav-links{justify-content:center;}
-}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -175,6 +17,7 @@ footer .copy{font-size:10px;color:var(--dim);letter-spacing:.5px;line-height:1.7
     <li><a href="#inicio">INICIO</a></li>
     <li><a href="#sobre-mi">SOBRE MÍ</a></li>
     <li><a href="#proyectos">PROYECTOS</a></li>
+    <li><a href="blog.html">BLOG</a></li>
     <li><a href="#contacto">CONTACTO</a></li>
   </ul>
 </nav>
@@ -299,17 +142,8 @@ footer .copy{font-size:10px;color:var(--dim);letter-spacing:.5px;line-height:1.7
   </div>
 </footer>
 
+<script src="stars.js"></script>
 <script>
-const starField = document.getElementById('stars');
-for(let i=0;i<60;i++){
-  const s = document.createElement('div');
-  s.className = 'star';
-  s.style.left = Math.random()*100 + 'vw';
-  s.style.top = Math.random()*100 + 'vh';
-  s.style.animationDelay = (Math.random()*3) + 's';
-  starField.appendChild(s);
-}
-
 const sections = document.querySelectorAll('section[id]');
 const navLinks = document.querySelectorAll('#navlinks a');
 const obs = new IntersectionObserver((entries)=>{
@@ -323,6 +157,9 @@ const obs = new IntersectionObserver((entries)=>{
 },{rootMargin:'-40% 0px -50% 0px'});
 sections.forEach(s=>obs.observe(s));
 </script>
+
+</body>
+</html>
 
 </body>
 </html>
