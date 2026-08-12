@@ -5,20 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DELTARUNE</title>
     
-    <!-- Fuente de respaldo muy fiel al estilo Undertale/Deltarune -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+    <!-- Importamos la fuente exacta de Undertale/Deltarune (Determination Sans) -->
+    <link href="https://fonts.cdnfonts.com/css/determination-sans" rel="stylesheet">
     
     <style>
-        /* Intentamos cargar la fuente original de la web de Deltarune */
-        @font-face {
-            font-family: '8bitoperator JVE';
-            src: url('https://deltarune.com/assets/8bitoperator_jve.woff') format('woff');
-            font-weight: normal;
-            font-style: normal;
-        }
-
         :root {
             --bg-color: #000000;
             --text-color: #ffffff;
@@ -35,15 +25,16 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
-            /* Priorizamos la fuente original, si no carga, usa el respaldo perfecto */
-            font-family: '8bitoperator JVE', 'DotGothic16', monospace;
+            /* Usamos la fuente original del juego */
+            font-family: 'Determination Sans', sans-serif;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             overflow-x: hidden;
-            text-transform: uppercase;
+            /* La fuente Determination se ve mejor sin forzar mayúsculas, 
+               ya que tiene un diseño específico para altas y bajas */
         }
 
         /* Estilo de la caja de diálogo típica del juego */
@@ -51,31 +42,43 @@
             max-width: 800px;
             width: 90%;
             background: var(--bg-color);
-            border: 4px solid var(--text-color);
-            padding: 3rem 2rem;
+            border: 6px solid var(--text-color); /* Borde un poco más grueso */
+            padding: 3rem 2.5rem;
             text-align: center;
-            /* Toque moderno: una sombra sólida en bloque, no difuminada */
             box-shadow: 8px 8px 0px rgba(255, 255, 255, 0.15);
             animation: typeIn 0.8s steps(20, end);
+            /* Suavizado de fuente desactivado para mantener el aspecto pixelado */
+            -webkit-font-smoothing: none;
+            font-smooth: never;
         }
 
         h1 {
-            font-size: 4rem;
-            letter-spacing: 4px;
-            margin-bottom: 1rem;
+            font-size: 5rem;
+            letter-spacing: 2px;
+            margin-bottom: 1.5rem;
             color: var(--text-color);
+            text-transform: uppercase;
+        }
+
+        .asterisk {
+            color: var(--text-color);
+            margin-right: 10px;
         }
 
         .subtitle {
-            font-size: 1.5rem;
+            font-size: 2rem; /* Aumentado porque Determination Sans es más compacta */
             margin-bottom: 3rem;
-            line-height: 1.5;
+            line-height: 1.4;
+            text-align: left; /* Alineado a la izquierda como en los diálogos del juego */
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .soul-text {
             color: var(--soul-red);
             display: block;
-            margin-top: 10px;
+            margin-top: 15px;
             animation: pulse 2s infinite;
         }
 
@@ -91,25 +94,25 @@
         .btn {
             background: var(--bg-color);
             color: var(--text-color);
-            font-family: inherit;
-            font-size: 1.5rem;
+            font-family: 'Determination Sans', sans-serif;
+            font-size: 2rem;
             text-decoration: none;
             padding: 1rem 2rem;
-            border: 2px solid var(--text-color);
+            border: 3px solid var(--text-color);
             cursor: pointer;
             position: relative;
-            /* Toque moderno: transición ultra rápida (crisp) */
             transition: all 0.1s ease;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
+            text-transform: uppercase;
         }
 
         /* El corazón (alma) que aparece al pasar el cursor */
         .btn::before {
-            content: '❤';
+            content: '♥'; /* Corazón clásico */
             color: transparent;
-            font-size: 1.2rem;
+            font-size: 1.8rem;
             transition: color 0.1s ease;
         }
 
@@ -117,9 +120,8 @@
         .btn:hover {
             border-color: var(--select-yellow);
             color: var(--select-yellow);
-            /* Sombra en bloque para el hover */
-            box-shadow: 4px 4px 0px var(--select-yellow);
-            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--select-yellow);
+            transform: translate(-3px, -3px);
         }
 
         .btn:hover::before {
@@ -128,9 +130,10 @@
 
         footer {
             margin-top: 3rem;
-            font-size: 1rem;
+            font-size: 1.2rem;
             text-align: center;
             opacity: 0.7;
+            text-transform: uppercase;
         }
 
         footer a {
@@ -145,7 +148,7 @@
         /* Animaciones */
         @keyframes pulse {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            50% { opacity: 0.6; }
         }
 
         @keyframes typeIn {
@@ -154,19 +157,21 @@
         }
 
         @media (max-width: 600px) {
-            h1 { font-size: 2.5rem; }
+            h1 { font-size: 3.5rem; }
+            .subtitle { font-size: 1.5rem; }
             .btn { width: 100%; justify-content: center; }
-            .dialog-box { border-width: 2px; padding: 2rem 1rem; }
+            .dialog-box { border-width: 4px; padding: 2rem 1rem; }
         }
     </style>
 </head>
 <body>
 
     <div class="dialog-box">
-        <h1>TESTING</h1>
+        <h1>DELTARUNE</h1>
+        
         <div class="subtitle">
-            <p>Capítulos 1 y 2 ya disponibles.</p>
-            <p class="soul-text">El futuro está en tus manos.</p>
+            <p><span class="asterisk">*</span> Capítulos 1 y 2 ya disponibles.</p>
+            <p class="soul-text"><span class="asterisk">*</span> El futuro está en tus manos.</p>
         </div>
 
         <div class="download-section">
@@ -178,9 +183,6 @@
     <footer>
         <p>DISEÑO REIMAGINADO. <br> <a href="https://deltarune.com" target="_blank">DELTARUNE.COM</a></p>
     </footer>
-
-</body>
-</html>
 
 </body>
 </html>
