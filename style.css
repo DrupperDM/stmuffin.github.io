@@ -168,7 +168,7 @@ footer .copy{font-size:10px;color:var(--dim);letter-spacing:.5px;line-height:1.7
 .post-list{display:flex;flex-direction:column;gap:14px;max-width:780px;margin:0 auto;padding:0 20px 60px;position:relative;z-index:1;}
 .post-card{display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--border);padding:0;cursor:pointer;transition:border-color .15s;overflow:hidden;}
 .post-card:hover{border-color:var(--gold);}
-.post-card .pc-cover{width:100%;aspect-ratio:16/7;object-fit:cover;display:block;border-bottom:1px solid var(--border);}
+.post-card .pc-cover{width:100%;aspect-ratio:16/7;object-fit:contain;background:var(--bg);display:block;border-bottom:1px solid var(--border);}
 .post-card .pc-inner{padding:20px 22px;}
 .post-card .pc-top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px;}
 .post-card .pc-title{font-size:13px;letter-spacing:.5px;color:var(--white);}
