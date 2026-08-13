@@ -70,7 +70,7 @@ nav{
 
 /* ---------- hero (home) ---------- */
 .hero{position:relative;z-index:1;text-align:center;padding:70px 18px 40px;}
-.souls{display:flex;justify-content:center;gap:10px;margin-bottom:20px;}
+.souls{display:flex;justify-content:center;gap:10px;margin-bottom:20px;transform: translateX(-12px); /* Mueve los corazones a la izquierda */}
 .soul{width:12px;height:12px;background:var(--gold);clip-path:polygon(50% 100%,0% 38%,20% 0%,50% 22%,80% 0%,100% 38%);animation:pulse 1.6s infinite ease-in-out;}
 .soul:nth-child(2){animation-delay:.2s;}
 .soul:nth-child(3){animation-delay:.4s;}
