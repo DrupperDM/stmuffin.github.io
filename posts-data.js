@@ -28,7 +28,7 @@ const POSTS = [
     title: "FIN DE CUBIKASMP TEMPORADA 3 - MUCHAS GRACIAS POR JUGAR",
     date: "2026-07-28",
     tags: ["cubikasmp t3"],
-    cover: "https://i.imgur.com/cSfeGPP.png",
+    cover: "https://i.imgur.com/WVKIfxF.png",
     excerpt: "CUBIKASMP T3",
     content: "Escribo este post para anunciar el cierre de CubikaSMP TEMPORADA 3, fue una temporada de pruebas y risas, y aunque tuvo sus momentos incomodos, se logró sobrellevar el servidor y se vivieron momentos increibles, gracias por todo."
   },
