@@ -30,24 +30,12 @@
     <h2>* INICIAR SESIÓN</h2>
     <form id="loginForm">
       <div class="field">
-        <label for="l-owner">USUARIO / ORGANIZACIÓN DE GITHUB</label>
-        <input type="text" id="l-owner" placeholder="tu-usuario" required>
-      </div>
-      <div class="field">
-        <label for="l-repo">REPOSITORIO</label>
-        <input type="text" id="l-repo" placeholder="mi-pagina" required>
-      </div>
-      <div class="field">
-        <label for="l-branch">RAMA</label>
-        <input type="text" id="l-branch" placeholder="main" value="main">
-      </div>
-      <div class="field">
-        <label for="l-path">RUTA DEL ARCHIVO DE POSTS</label>
-        <input type="text" id="l-path" placeholder="posts-data.js" value="posts-data.js">
+        <label for="l-repo">REPOSITORIO (usuario/repositorio)</label>
+        <input type="text" id="l-repo" placeholder="tu-usuario/mi-pagina" required>
       </div>
       <div class="field">
         <label for="l-token">TOKEN DE ACCESO PERSONAL (GITHUB)</label>
-        <input type="password" id="l-token" placeholder="ghp_xxxxxxxxxxxx" required>
+        <input type="password" id="l-token" placeholder="github_pat_xxxxxxxxxxxx" required>
         <div class="hint">
           Créalo en GitHub → Settings → Developer settings → Fine-grained tokens.
           Dale acceso <strong>solo a este repositorio</strong> y permiso de
@@ -55,6 +43,19 @@
           pidas eso aquí.
         </div>
       </div>
+
+      <button type="button" class="btn" id="advancedToggle" style="margin-bottom:16px;">OPCIONES AVANZADAS ▾</button>
+      <div id="advancedFields" style="display:none;">
+        <div class="field">
+          <label for="l-branch">RAMA</label>
+          <input type="text" id="l-branch" placeholder="main" value="main">
+        </div>
+        <div class="field">
+          <label for="l-path">RUTA DEL ARCHIVO DE POSTS</label>
+          <input type="text" id="l-path" placeholder="posts-data.js" value="posts-data.js">
+        </div>
+      </div>
+
       <div class="btn-row">
         <button type="submit" class="btn btn-gold">ENTRAR</button>
       </div>
@@ -109,9 +110,10 @@
       </div>
       <div class="img-pane" data-picker="cover" data-mode="file">
         <input type="file" id="cover-file" accept="image/*">
-        <div class="hint">* al subir un archivo, la imagen se guarda directamente dentro de posts-data.js en base64 (no necesitas subir el archivo aparte). Es más cómodo, pero infla un poco el archivo — para portadas grandes es mejor usar una URL.</div>
+        <div class="hint">* al elegir un archivo se sube automáticamente a la carpeta <code>images/</code> de tu repositorio (necesitas haber iniciado sesión). Espera a que diga "imagen subida" antes de generar la entrada.</div>
       </div>
       <div class="img-preview" id="cover-preview"><img id="cover-preview-img" alt=""></div>
+      <div class="upload-status" id="cover-upload-status"></div>
     </div>
   </div>
 
@@ -145,6 +147,7 @@
         <input type="text" id="insert-alt" placeholder="Captura de mi proyecto corriendo en local">
       </div>
       <div class="img-preview" id="insert-preview"><img id="insert-preview-img" alt=""></div>
+      <div class="upload-status" id="insert-upload-status"></div>
       <div class="btn-row" style="margin-top:14px;">
         <button type="button" class="btn btn-gold" id="insertImgBtn">INSERTAR EN EL TEXTO</button>
         <button type="button" class="btn" id="cancelInsertBtn">CANCELAR</button>
@@ -209,17 +212,27 @@ function showLogin(){
   document.getElementById('formWrap').style.display = 'none';
 }
 
+document.getElementById('advancedToggle').addEventListener('click', ()=>{
+  const box = document.getElementById('advancedFields');
+  const btn = document.getElementById('advancedToggle');
+  const open = box.style.display !== 'none';
+  box.style.display = open ? 'none' : 'block';
+  btn.textContent = open ? 'OPCIONES AVANZADAS ▾' : 'OPCIONES AVANZADAS ▴';
+});
+
 document.getElementById('loginForm').addEventListener('submit', (e)=>{
   e.preventDefault();
-  const owner = document.getElementById('l-owner').value.trim();
-  const repo = document.getElementById('l-repo').value.trim();
+  const repoField = document.getElementById('l-repo').value.trim();
   const branch = document.getElementById('l-branch').value.trim() || 'main';
   const path = document.getElementById('l-path').value.trim() || 'posts-data.js';
   const token = document.getElementById('l-token').value.trim();
-  if(!owner || !repo || !token){
-    alert('Completa usuario, repositorio y token.');
+
+  const parts = repoField.split('/').map(p=>p.trim()).filter(Boolean);
+  if(parts.length !== 2 || !token){
+    alert('Escribe el repositorio como usuario/repositorio y pega tu token.');
     return;
   }
+  const [owner, repo] = parts;
   sessionStorage.setItem('gh_auth', JSON.stringify({owner, repo, branch, path, token}));
   showApp();
 });
@@ -304,6 +317,58 @@ function showPreview(previewId, src){
   wrap.classList.add('show');
 }
 
+function setUploadStatus(elId, text, type){
+  const el = document.getElementById(elId);
+  el.textContent = text;
+  el.className = 'upload-status ' + type;
+}
+
+function sanitizeFilename(name){
+  const dotIdx = name.lastIndexOf('.');
+  const ext = dotIdx !== -1 ? name.slice(dotIdx) : '';
+  const base = dotIdx !== -1 ? name.slice(0, dotIdx) : name;
+  const clean = base.normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+  return (clean || 'imagen') + ext.toLowerCase();
+}
+
+function fileToBase64(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=> resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+let uploadsInProgress = 0;
+function trackUpload(promise){
+  uploadsInProgress++;
+  document.getElementById('genBtn').disabled = true;
+  promise.finally(()=>{
+    uploadsInProgress--;
+    document.getElementById('genBtn').disabled = uploadsInProgress > 0;
+  });
+  return promise;
+}
+
+async function uploadImageToGithub(file, auth){
+  const filename = `${Date.now()}-${sanitizeFilename(file.name)}`;
+  const base64 = await fileToBase64(file);
+  const apiUrl = `https://api.github.com/repos/${auth.owner}/${auth.repo}/contents/images/${filename}`;
+  const res = await fetch(apiUrl, {
+    method: 'PUT',
+    headers: {...authHeaders(auth), 'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      message: `Subir imagen: ${filename}`,
+      content: base64,
+      branch: auth.branch
+    })
+  });
+  if(!res.ok) throw new Error(await githubErrorMessage(res, 'No pude subir la imagen'));
+  return `images/${filename}`;
+}
+
 document.getElementById('cover-url').addEventListener('input', (e)=>{
   coverSrc = e.target.value.trim();
   showPreview('cover-preview', coverSrc);
@@ -311,8 +376,23 @@ document.getElementById('cover-url').addEventListener('input', (e)=>{
 document.getElementById('cover-file').addEventListener('change', async (e)=>{
   const file = e.target.files[0];
   if(!file) return;
-  coverSrc = await fileToDataUrl(file);
-  showPreview('cover-preview', coverSrc);
+  const auth = getAuth();
+  if(!auth){ alert('Inicia sesión primero.'); return; }
+
+  const localPreview = await fileToDataUrl(file);
+  showPreview('cover-preview', localPreview);
+  setUploadStatus('cover-upload-status', 'Subiendo imagen a images/ en GitHub...', 'info');
+  coverSrc = '';
+
+  trackUpload((async ()=>{
+    try{
+      const path = await uploadImageToGithub(file, auth);
+      coverSrc = path;
+      setUploadStatus('cover-upload-status', `✔ imagen subida: ${path}`, 'success');
+    }catch(err){
+      setUploadStatus('cover-upload-status', err.message || 'No se pudo subir la imagen.', 'error');
+    }
+  })());
 });
 
 document.getElementById('insert-url').addEventListener('input', (e)=>{
@@ -322,8 +402,23 @@ document.getElementById('insert-url').addEventListener('input', (e)=>{
 document.getElementById('insert-file').addEventListener('change', async (e)=>{
   const file = e.target.files[0];
   if(!file) return;
-  insertSrc = await fileToDataUrl(file);
-  showPreview('insert-preview', insertSrc);
+  const auth = getAuth();
+  if(!auth){ alert('Inicia sesión primero.'); return; }
+
+  const localPreview = await fileToDataUrl(file);
+  showPreview('insert-preview', localPreview);
+  setUploadStatus('insert-upload-status', 'Subiendo imagen a images/ en GitHub...', 'info');
+  insertSrc = '';
+
+  trackUpload((async ()=>{
+    try{
+      const path = await uploadImageToGithub(file, auth);
+      insertSrc = path;
+      setUploadStatus('insert-upload-status', `✔ imagen subida: ${path}`, 'success');
+    }catch(err){
+      setUploadStatus('insert-upload-status', err.message || 'No se pudo subir la imagen.', 'error');
+    }
+  })());
 });
 
 /* ---------- insert-image panel open/close ---------- */
@@ -357,6 +452,7 @@ document.getElementById('insertImgBtn').addEventListener('click', ()=>{
   document.getElementById('insert-alt').value = '';
   insertSrc = '';
   showPreview('insert-preview', '');
+  setUploadStatus('insert-upload-status', '', 'info');
   insertPanel.style.display = 'none';
   contentField.focus();
 });
@@ -521,6 +617,5 @@ document.getElementById('publishBtn').addEventListener('click', async ()=>{
 
 </body>
 </html>
-
 </body>
 </html>
