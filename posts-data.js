@@ -30,6 +30,14 @@
 
 const POSTS = [
   {
+    slug: "test3",
+    title: "test3",
+    date: "2026-11-21",
+    tags: ["test"],
+    excerpt: "asdasd",
+    content: "![audio](https://www.myinstants.com/en/instant/fart-with-reverb-17715/?utm_source=copy&utm_medium=share)"
+  },
+  {
     slug: "fin-de-cubikasmp-temporada-3-muchas-gracias-por-jugar",
     title: "FIN DE CUBIKASMP TEMPORADA 3 - MUCHAS GRACIAS POR JUGAR",
     date: "2026-07-28",
