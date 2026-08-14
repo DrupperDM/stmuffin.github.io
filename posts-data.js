@@ -30,6 +30,15 @@
 
 const POSTS = [
   {
+    slug: "test2",
+    title: "test2",
+    date: "2026-08-13",
+    tags: ["test"],
+    cover: "images/1786669368836-image-1.png",
+    excerpt: "asdasdasd",
+    content: "asdasdasd\n\nhttps://www.youtube.com/watch?v=_XmZBavbsCw\n\n\n\nhttps://discord.gg/zRhHXWYPw\n\n\n\nhttps://x.com/chiZyt0XD/status/2088012066628002303?s=20"
+  },
+  {
     slug: "test",
     title: "TEST",
     date: "2026-08-13",
