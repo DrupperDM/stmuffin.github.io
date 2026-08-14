@@ -209,12 +209,13 @@ footer .copy{font-size:10px;color:var(--dim);letter-spacing:.5px;line-height:1.7
 .discord-text strong{color:var(--white);letter-spacing:.5px;}
 .discord-sub{font-size:10px;color:var(--dim);word-break:break-all;}
 
-/* ---------- comentarios (Remark42) ---------- */
+/* ---------- comentarios (GraphComment) ---------- */
 .pd-comments-block{margin-top:48px;}
 .pd-comments-block .divider{margin-bottom:26px;}
 .pd-comments-block h2{font-family:var(--pixel);font-size:14px;letter-spacing:1px;color:var(--white);margin-bottom:22px;text-align:center;}
 .pd-comments-block h2 .mark{color:var(--gold);}
-#remark42{max-width:100%;}
+.comments-panel{border:1px solid var(--border);background:var(--panel);padding:20px;}
+#graphcomment{max-width:100%;min-height:80px;}
 .comments-notice{font-size:11px;line-height:1.8;color:var(--dim);border:1px dashed var(--border);padding:14px 16px;text-align:center;}
 
 /* ---------- NSFW blur ---------- */
