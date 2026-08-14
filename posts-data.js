@@ -30,6 +30,15 @@
 
 const POSTS = [
   {
+    slug: "test",
+    title: "TEST",
+    date: "2026-08-13",
+    tags: ["test"],
+    cover: "images/1786668417990-hnn-xgzxyaa8dbm.jpg",
+    excerpt: "UN TEST DE PAGINA",
+    content: "ASKAJKSFLKASFASLKFLASFJKLASFLKAFS\n\n![TEST](images/1786668439620-hnn-xgzxyaa8dbm.jpg)"
+  },
+  {
     slug: "hola-mundo",
     title: "¡Hola, mundo!",
     date: "2026-08-10",
