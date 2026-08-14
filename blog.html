@@ -51,19 +51,18 @@
 
 <script src="stars.js"></script>
 <script src="posts-data.js"></script>
+<script src="post-render.js"></script>
 <script>
 const listView = document.getElementById('listView');
 const detailView = document.getElementById('detailView');
 const postList = document.getElementById('postList');
 const tagFilters = document.getElementById('tagFilters');
+let pendingTextFiles = [];
 
 const sorted = [...POSTS].sort((a,b)=> new Date(b.date) - new Date(a.date));
 
-function formatDate(iso){
-  const d = new Date(iso + 'T00:00:00');
-  const meses = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
-  return meses[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
-}
+wireNsfwReveal(postList);
+wireNsfwReveal(detailView);
 
 function buildTagFilters(){
   const tags = new Set();
@@ -97,108 +96,10 @@ function renderList(filterTag){
   items.forEach(post=>{
     const card = document.createElement('button');
     card.className = 'post-card';
-    const coverHtml = post.cover ? `<img class="pc-cover" src="${post.cover}" alt="">` : '';
-    card.innerHTML = `
-      ${coverHtml}
-      <div class="pc-inner">
-        <div class="pc-top">
-          <span class="pc-title">${post.title}</span>
-          <span class="pc-date">${formatDate(post.date)}</span>
-        </div>
-        <div class="pc-excerpt">${post.excerpt}</div>
-        <div class="pc-tags">${(post.tags||[]).map(t=>`<span class="pill">${t}</span>`).join('')}</div>
-      </div>
-    `;
+    card.innerHTML = renderPostCardInner(post);
     card.addEventListener('click', ()=> openPost(post.slug));
     postList.appendChild(card);
   });
-}
-
-const IMG_LINE = /^!\[(.*?)\]\((.*?)\)$/;
-const URL_ONLY = /^(https?:\/\/\S+)$/;
-
-function getYoutubeId(url){
-  try{
-    const u = new URL(url);
-    const host = u.hostname.replace(/^www\./,'').replace(/^m\./,'');
-    if(host === 'youtu.be') return u.pathname.split('/').filter(Boolean)[0] || null;
-    if(host === 'youtube.com'){
-      if(u.pathname === '/watch') return u.searchParams.get('v');
-      const parts = u.pathname.split('/').filter(Boolean);
-      if(parts[0] === 'embed' || parts[0] === 'shorts') return parts[1] || null;
-    }
-    return null;
-  }catch(e){ return null; }
-}
-
-function isTwitterUrl(url){
-  try{
-    const u = new URL(url);
-    const host = u.hostname.replace(/^www\./,'');
-    return (host === 'twitter.com' || host === 'x.com') && /\/status\/\d+/.test(u.pathname);
-  }catch(e){ return false; }
-}
-
-function isDiscordInvite(url){
-  try{
-    const u = new URL(url);
-    const host = u.hostname.replace(/^www\./,'');
-    return host === 'discord.gg' || (host === 'discord.com' && u.pathname.startsWith('/invite/'));
-  }catch(e){ return false; }
-}
-
-function renderYoutubeEmbed(id){
-  return `<div class="embed-block embed-video"><div class="video-frame"><iframe src="https://www.youtube.com/embed/${id}" title="Video de YouTube" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe></div></div>`;
-}
-
-function renderTweetEmbed(url){
-  return `<div class="embed-block embed-tweet"><blockquote class="twitter-tweet" data-theme="dark"><a href="${url}"></a></blockquote></div>`;
-}
-
-function renderDiscordEmbed(url){
-  const label = url.replace(/^https?:\/\//,'');
-  return `<div class="embed-block embed-discord"><a class="discord-card" href="${url}" target="_blank" rel="noopener">
-    <span class="discord-icon">DC</span>
-    <span class="discord-text"><strong>Únete al servidor de Discord</strong><span class="discord-sub">${label}</span></span>
-  </a></div>`;
-}
-
-function loadTwitterWidgets(){
-  if(window.twttr && window.twttr.widgets){
-    window.twttr.widgets.load(detailView);
-    return;
-  }
-  if(document.getElementById('twitter-wjs')) return;
-  const s = document.createElement('script');
-  s.id = 'twitter-wjs';
-  s.src = 'https://platform.twitter.com/widgets.js';
-  s.async = true;
-  document.body.appendChild(s);
-}
-
-function renderBody(content){
-  return content.split(/\n\s*\n/).map(block=>{
-    const trimmed = block.trim();
-
-    const imgMatch = trimmed.match(IMG_LINE);
-    if(imgMatch){
-      const alt = imgMatch[1];
-      const src = imgMatch[2];
-      const caption = alt ? `<figcaption>${alt}</figcaption>` : '';
-      return `<figure><img src="${src}" alt="${alt}">${caption}</figure>`;
-    }
-
-    const urlMatch = trimmed.match(URL_ONLY);
-    if(urlMatch){
-      const url = urlMatch[1];
-      const ytId = getYoutubeId(url);
-      if(ytId) return renderYoutubeEmbed(ytId);
-      if(isTwitterUrl(url)) return renderTweetEmbed(url);
-      if(isDiscordInvite(url)) return renderDiscordEmbed(url);
-    }
-
-    return `<p>${block.replace(/\n/g,'<br>')}</p>`;
-  }).join('');
 }
 
 function openPost(slug){
@@ -207,16 +108,25 @@ function openPost(slug){
   location.hash = slug;
   listView.style.display = 'none';
   detailView.style.display = 'block';
-  const coverHtml = post.cover ? `<img class="pd-cover" src="${post.cover}" alt="">` : '';
+
+  const coverHtml = post.cover
+    ? imageMarkup(post.cover, '', post.coverNsfw, 'pd-cover', 'pd-cover-wrap', true)
+    : '';
+
+  pendingTextFiles = [];
+  const bodyHtml = renderBody(post.content, pendingTextFiles);
+
   detailView.innerHTML = `
     <a class="back-link" href="blog.html">&larr; volver al blog</a>
     <h1>${post.title}</h1>
     <div class="pd-meta">${formatDate(post.date)}</div>
     <div class="pd-tags">${(post.tags||[]).map(t=>`<span class="pill">${t}</span>`).join('')}</div>
     ${coverHtml}
-    <div class="pd-body">${renderBody(post.content)}</div>
+    <div class="pd-body">${bodyHtml}</div>
   `;
-  if(detailView.querySelector('.twitter-tweet')) loadTwitterWidgets();
+
+  pendingTextFiles.forEach(({id, path}) => loadTextFile(id, path));
+  if(detailView.querySelector('.twitter-tweet')) loadTwitterWidgets(detailView);
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -227,7 +137,7 @@ function closeDetail(){
 }
 
 detailView.addEventListener('click', (e)=>{
-  if(e.target.classList.contains('back-link')){
+  if(e.target.closest('.back-link')){
     e.preventDefault();
     closeDetail();
   }
@@ -243,6 +153,5 @@ if(location.hash){
 
 </body>
 </html>
-
 </body>
 </html>
