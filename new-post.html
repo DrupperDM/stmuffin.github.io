@@ -21,18 +21,65 @@
 
 <header class="page-header">
   <h1>* NUEVA ENTRADA</h1>
-  <p>Esta página es solo para ti: arma tu post, genera el bloque de código y pégalo en posts-data.js.</p>
+  <p>Arma tu post y publícalo directo en el repo — sin copiar y pegar nada a mano.</p>
 </header>
 
-<div class="form-wrap">
-
-  <div class="notice">
-    <strong>Cómo funciona:</strong> como el sitio vive en GitHub Pages, no hay
-    un servidor detrás que guarde nada por ti. Esta herramienta arma el
-    objeto del post por ti — tú lo copias, lo pegas dentro del arreglo
-    <code>POSTS</code> en <code>posts-data.js</code>, guardas y subes el
-    cambio a GitHub. Así aparece en el blog.
+<!-- ================= LOGIN ================= -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <h2>* INICIAR SESIÓN</h2>
+    <form id="loginForm">
+      <div class="field">
+        <label for="l-owner">USUARIO / ORGANIZACIÓN DE GITHUB</label>
+        <input type="text" id="l-owner" placeholder="tu-usuario" required>
+      </div>
+      <div class="field">
+        <label for="l-repo">REPOSITORIO</label>
+        <input type="text" id="l-repo" placeholder="mi-pagina" required>
+      </div>
+      <div class="field">
+        <label for="l-branch">RAMA</label>
+        <input type="text" id="l-branch" placeholder="main" value="main">
+      </div>
+      <div class="field">
+        <label for="l-path">RUTA DEL ARCHIVO DE POSTS</label>
+        <input type="text" id="l-path" placeholder="posts-data.js" value="posts-data.js">
+      </div>
+      <div class="field">
+        <label for="l-token">TOKEN DE ACCESO PERSONAL (GITHUB)</label>
+        <input type="password" id="l-token" placeholder="ghp_xxxxxxxxxxxx" required>
+        <div class="hint">
+          Créalo en GitHub → Settings → Developer settings → Fine-grained tokens.
+          Dale acceso <strong>solo a este repositorio</strong> y permiso de
+          "Contents: Read and write". No uses tu contraseña de GitHub, nunca
+          pidas eso aquí.
+        </div>
+      </div>
+      <div class="btn-row">
+        <button type="submit" class="btn btn-gold">ENTRAR</button>
+      </div>
+    </form>
+    <div class="notice" style="margin-top:18px;">
+      <strong>Sobre esto:</strong> esta página es estática — no hay un servidor
+      "detrás" que verifique un usuario y contraseña. El token de arriba hace
+      esa función: es tu llave personal para escribir en tu repositorio. Se
+      guarda solo en la memoria de esta pestaña (<code>sessionStorage</code>)
+      y desaparece al cerrarla — nunca se sube a GitHub ni se envía a ningún
+      otro lugar más que a la API oficial de GitHub. Si alguien más abre esta
+      página sin tu token, simplemente no podrá publicar nada: GitHub
+      rechazará la petición.
+    </div>
   </div>
+</div>
+
+<!-- ================= SESSION BAR ================= -->
+<div class="session-bar" id="sessionBar" style="display:none;">
+  <span class="who" id="whoText"></span>
+  <button class="btn" id="logoutBtn">CERRAR SESIÓN</button>
+</div>
+
+<!-- ================= FORM ================= -->
+<div class="form-wrap" id="formWrap" style="display:none;">
 
   <div class="field">
     <label for="f-title">TÍTULO</label>
@@ -62,7 +109,7 @@
       </div>
       <div class="img-pane" data-picker="cover" data-mode="file">
         <input type="file" id="cover-file" accept="image/*">
-        <div class="hint">* al subir un archivo, la imagen se guarda directamente dentro de posts-data.js (no necesitas subir el archivo aparte a GitHub). Es más cómodo, pero infla un poco el archivo — para portadas grandes es mejor usar una URL.</div>
+        <div class="hint">* al subir un archivo, la imagen se guarda directamente dentro de posts-data.js en base64 (no necesitas subir el archivo aparte). Es más cómodo, pero infla un poco el archivo — para portadas grandes es mejor usar una URL.</div>
       </div>
       <div class="img-preview" id="cover-preview"><img id="cover-preview-img" alt=""></div>
     </div>
@@ -118,17 +165,20 @@
     </div>
 
     <div class="field">
-      <label>CÓDIGO PARA PEGAR EN posts-data.js</label>
+      <label>CÓDIGO GENERADO</label>
       <div class="code-box">
         <button class="copy-btn" id="copyBtn">COPIAR</button>
         <pre id="codeOutput"></pre>
       </div>
-      <div class="hint">* pégalo como un elemento nuevo dentro del arreglo <code>POSTS = [ ... ]</code>, con una coma antes o después del elemento vecino.</div>
+      <div class="hint">* esto es lo que se va a insertar dentro del arreglo <code>POSTS = [ ... ]</code> de tu archivo de posts.</div>
     </div>
 
     <div class="btn-row">
+      <button class="btn btn-gold" id="publishBtn">PUBLICAR EN GITHUB</button>
       <button class="btn" id="downloadBtn">DESCARGAR .JS</button>
     </div>
+
+    <div id="publishStatus"></div>
   </div>
 
 </div>
@@ -139,6 +189,49 @@
 
 <script src="stars.js"></script>
 <script>
+/* ================= AUTH / LOGIN ================= */
+function getAuth(){
+  const raw = sessionStorage.getItem('gh_auth');
+  return raw ? JSON.parse(raw) : null;
+}
+
+function showApp(){
+  const auth = getAuth();
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('sessionBar').style.display = 'flex';
+  document.getElementById('formWrap').style.display = 'flex';
+  document.getElementById('whoText').innerHTML = `Conectado como <strong>${auth.owner}/${auth.repo}</strong> (${auth.branch})`;
+}
+
+function showLogin(){
+  document.getElementById('loginScreen').style.display = 'block';
+  document.getElementById('sessionBar').style.display = 'none';
+  document.getElementById('formWrap').style.display = 'none';
+}
+
+document.getElementById('loginForm').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const owner = document.getElementById('l-owner').value.trim();
+  const repo = document.getElementById('l-repo').value.trim();
+  const branch = document.getElementById('l-branch').value.trim() || 'main';
+  const path = document.getElementById('l-path').value.trim() || 'posts-data.js';
+  const token = document.getElementById('l-token').value.trim();
+  if(!owner || !repo || !token){
+    alert('Completa usuario, repositorio y token.');
+    return;
+  }
+  sessionStorage.setItem('gh_auth', JSON.stringify({owner, repo, branch, path, token}));
+  showApp();
+});
+
+document.getElementById('logoutBtn').addEventListener('click', ()=>{
+  sessionStorage.removeItem('gh_auth');
+  showLogin();
+});
+
+if(getAuth()) showApp(); else showLogin();
+
+/* ================= HELPERS ================= */
 function slugify(text){
   return text
     .toLowerCase()
@@ -166,6 +259,19 @@ function fileToDataUrl(file){
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
+}
+
+function utf8ToBase64(str){
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  bytes.forEach(b => binary += String.fromCharCode(b));
+  return btoa(binary);
+}
+
+function base64ToUtf8(b64){
+  const binary = atob(b64.replace(/\n/g,''));
+  const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+  return new TextDecoder('utf-8').decode(bytes);
 }
 
 /* ---------- generic image picker wiring ---------- */
@@ -255,7 +361,7 @@ document.getElementById('insertImgBtn').addEventListener('click', ()=>{
   contentField.focus();
 });
 
-/* ---------- generate post object ---------- */
+/* ================= GENERATE POST OBJECT ================= */
 document.getElementById('genBtn').addEventListener('click', ()=>{
   const title = document.getElementById('f-title').value.trim();
   const dateVal = document.getElementById('f-date').value;
@@ -300,6 +406,7 @@ document.getElementById('genBtn').addEventListener('click', ()=>{
     </div>
   `;
 
+  document.getElementById('publishStatus').innerHTML = '';
   document.getElementById('outputWrap').style.display = 'block';
   document.getElementById('outputWrap').scrollIntoView({behavior:'smooth', block:'start'});
 });
@@ -324,6 +431,91 @@ document.getElementById('downloadBtn').addEventListener('click', ()=>{
   a.download = slugify(title) + '.js';
   a.click();
   URL.revokeObjectURL(url);
+});
+
+/* ================= PUBLISH TO GITHUB ================= */
+function setStatus(html, type){
+  document.getElementById('publishStatus').innerHTML = `<div class="status-msg ${type}">${html}</div>`;
+}
+
+function authHeaders(auth){
+  return {
+    'Authorization': `Bearer ${auth.token}`,
+    'Accept': 'application/vnd.github+json'
+  };
+}
+
+async function githubErrorMessage(res, prefix){
+  let detail = '';
+  try{
+    const data = await res.json();
+    detail = data.message || '';
+  }catch(e){}
+  if(res.status === 401) detail = 'Token inválido o vencido.';
+  if(res.status === 403) detail = detail || 'Sin permisos suficientes en el repositorio (revisa el scope del token).';
+  if(res.status === 404) detail = 'No encontré ese repositorio, rama o archivo. Revisa usuario/repo/ruta.';
+  return `${prefix}: ${detail} (código ${res.status})`;
+}
+
+document.getElementById('publishBtn').addEventListener('click', async ()=>{
+  const auth = getAuth();
+  if(!auth){
+    showLogin();
+    return;
+  }
+  const codeBlock = document.getElementById('codeOutput').textContent;
+  if(!codeBlock){
+    alert('Genera la entrada primero.');
+    return;
+  }
+
+  const publishBtn = document.getElementById('publishBtn');
+  publishBtn.disabled = true;
+  setStatus('Conectando con GitHub...', 'info');
+
+  try{
+    const apiBase = `https://api.github.com/repos/${auth.owner}/${auth.repo}/contents/${auth.path}`;
+
+    const getRes = await fetch(`${apiBase}?ref=${encodeURIComponent(auth.branch)}`, {
+      headers: authHeaders(auth)
+    });
+    if(!getRes.ok) throw new Error(await githubErrorMessage(getRes, 'No pude leer el archivo de posts'));
+    const fileData = await getRes.json();
+    const currentContent = base64ToUtf8(fileData.content);
+
+    const marker = 'const POSTS = [';
+    const idx = currentContent.indexOf(marker);
+    if(idx === -1){
+      throw new Error(`No encontré "${marker}" dentro de ${auth.path}. Revisa que la ruta configurada sea la correcta.`);
+    }
+    const insertPos = idx + marker.length;
+    const updatedContent = currentContent.slice(0, insertPos) + '\n' + codeBlock + currentContent.slice(insertPos);
+
+    const title = document.getElementById('f-title').value.trim() || 'sin título';
+    const putRes = await fetch(apiBase, {
+      method: 'PUT',
+      headers: {...authHeaders(auth), 'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        message: `Nuevo post: ${title}`,
+        content: utf8ToBase64(updatedContent),
+        sha: fileData.sha,
+        branch: auth.branch
+      })
+    });
+    if(!putRes.ok) throw new Error(await githubErrorMessage(putRes, 'No pude guardar los cambios'));
+    const putData = await putRes.json();
+    const commitUrl = putData.commit && putData.commit.html_url ? putData.commit.html_url : null;
+
+    setStatus(
+      `Publicado. El commit ya está en tu repo — GitHub Pages puede tardar uno o dos minutos en reconstruir el sitio antes de que se vea en línea.` +
+      (commitUrl ? ` <a href="${commitUrl}" target="_blank" rel="noopener">Ver commit en GitHub →</a>` : ''),
+      'success'
+    );
+  }catch(err){
+    setStatus(err.message || 'Algo salió mal al publicar.', 'error');
+  }finally{
+    publishBtn.disabled = false;
+  }
 });
 </script>
 
