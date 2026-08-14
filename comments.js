@@ -5,6 +5,13 @@
   levantar tu propio servidor, solo tener una cuenta en
   https://graphcomment.com con tu "graphcommentId" (el shortname de tu
   sitio).
+
+  Nota sobre el estilo visual: aquí forzamos el tema oscuro y lo
+  envolvemos en un panel con el borde/fondo del resto del sitio (ver
+  style.css → .comments-panel), pero los colores de acento, botones y
+  tipografía interna del widget en sí se configuran desde el panel de
+  tu sitio en graphcomment.com → pestaña "Appearance" (ahí puedes
+  poner un color personalizado parecido al dorado del sitio, #ffcc22).
 */
 
 const GRAPHCOMMENT_ID = "STARYMUFFIN";
@@ -33,7 +40,8 @@ function mountComments(post){
   window.__semio__params = {
     graphcommentId: GRAPHCOMMENT_ID,
     behaviour: {
-      uid: post.slug // identificador único del hilo de comentarios de este post
+      uid: post.slug, // identificador único del hilo de comentarios de este post
+      theme: 'dark'   // combina con el fondo negro del sitio
     }
   };
   /* - - - DON'T EDIT BELOW THIS LINE - - - */
