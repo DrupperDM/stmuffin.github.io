@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Editar entrada — TU NOMBRE</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="stars"></div>
+
+<nav>
+  <a href="index.html" class="nav-logo">TU<span class="heart">♥</span>NOMBRE</a>
+  <ul class="nav-links">
+    <li><a href="index.html#inicio">INICIO</a></li>
+    <li><a href="blog.html">BLOG</a></li>
+  </ul>
+</nav>
+
+<header class="page-header">
+  <h1>* EDITAR ENTRADA</h1>
+  <p>Elige un post existente, cámbiale lo que quieras y guarda los cambios directo en GitHub.</p>
+</header>
+
+<!-- ================= LOGIN ================= -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <h2>* INICIAR SESIÓN</h2>
+    <form id="loginForm">
+      <div class="field">
+        <label for="l-repo">REPOSITORIO (usuario/repositorio)</label>
+        <input type="text" id="l-repo" placeholder="tu-usuario/mi-pagina" required>
+      </div>
+      <div class="field">
+        <label for="l-token">TOKEN DE ACCESO PERSONAL (GITHUB)</label>
+        <input type="password" id="l-token" placeholder="github_pat_xxxxxxxxxxxx" required>
+        <div class="hint">
+          Créalo en GitHub → Settings → Developer settings → Fine-grained tokens.
+          Dale acceso <strong>solo a este repositorio</strong> y permiso de
+          "Contents: Read and write".
+        </div>
+      </div>
+
+      <button type="button" class="btn" id="advancedToggle" style="margin-bottom:16px;">OPCIONES AVANZADAS ▾</button>
+      <div id="advancedFields" style="display:none;">
+        <div class="field">
+          <label for="l-branch">RAMA</label>
+          <input type="text" id="l-branch" placeholder="main" value="main">
+        </div>
+        <div class="field">
+          <label for="l-path">RUTA DEL ARCHIVO DE POSTS</label>
+          <input type="text" id="l-path" placeholder="posts-data.js" value="posts-data.js">
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button type="submit" class="btn btn-gold">ENTRAR</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= SESSION BAR ================= -->
+<div class="session-bar" id="sessionBar" style="display:none;">
+  <span class="who" id="whoText"></span>
+  <button class="btn" id="logoutBtn">CERRAR SESIÓN</button>
+</div>
+
+<!-- ================= SELECCIÓN DE POST ================= -->
+<div id="selectView" style="display:none;">
+  <p style="text-align:center;font-size:12px;color:var(--dim);max-width:440px;margin:0 auto 24px;padding:0 20px;">
+    Elige qué entrada quieres editar.
+  </p>
+  <div class="select-list" id="selectList"></div>
+</div>
+
+<!-- ================= FORM ================= -->
+<div class="form-wrap" id="formWrap" style="display:none;">
+
+  <div class="editing-bar" style="margin:0 0 4px;padding:0;max-width:none;">
+    <span class="who">Editando: <strong id="editingTitle"></strong></span>
+    <button type="button" class="btn" id="cancelEditBtn">← VOLVER A LA LISTA</button>
+  </div>
+
+  <div class="field">
+    <label for="f-title">TÍTULO</label>
+    <input type="text" id="f-title" placeholder="Cómo sobreviví mi primer parcial">
+  </div>
+
+  <div class="field">
+    <label for="f-date">FECHA</label>
+    <input type="date" id="f-date">
+  </div>
+
+  <div class="field">
+    <label for="f-tags">ETIQUETAS (separadas por coma)</label>
+    <input type="text" id="f-tags" placeholder="universidad, codigo, random">
+  </div>
+
+  <!-- ---------- PORTADA ---------- -->
+  <div class="field">
+    <label>IMAGEN DE PORTADA (opcional)</label>
+    <div class="img-picker">
+      <div class="img-tabs">
+        <button type="button" class="img-tab active" data-picker="cover" data-mode="url">PEGAR URL</button>
+        <button type="button" class="img-tab" data-picker="cover" data-mode="file">SUBIR ARCHIVO</button>
+      </div>
+      <div class="img-pane active" data-picker="cover" data-mode="url">
+        <input type="text" id="cover-url" placeholder="https://ejemplo.com/mi-imagen.png">
+      </div>
+      <div class="img-pane" data-picker="cover" data-mode="file">
+        <input type="file" id="cover-file" accept="image/*">
+        <div class="hint">* se sube automáticamente a la carpeta <code>images/</code> de tu repositorio.</div>
+      </div>
+      <label class="nsfw-check"><input type="checkbox" id="cover-nsfw"> Marcar como NSFW (se muestra difuminada con advertencia)</label>
+      <div class="img-preview" id="cover-preview"></div>
+      <div class="upload-status" id="cover-upload-status"></div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="f-excerpt">EXTRACTO (resumen corto que se ve en la lista)</label>
+    <textarea id="f-excerpt" placeholder="Una o dos frases sobre de qué trata el post."></textarea>
+  </div>
+
+  <!-- ---------- CONTENIDO ---------- -->
+  <div class="field">
+    <div class="toolbar-row">
+      <label for="f-content">CONTENIDO</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button type="button" class="btn" id="toggleImgInsert">+ ADJUNTAR ARCHIVO</button>
+        <button type="button" class="btn" id="toggleLinkInsert">+ INSERTAR ENLACE</button>
+      </div>
+    </div>
+
+    <div class="format-toolbar">
+      <button type="button" class="fmt-btn" id="fmtBold" title="Negrita (selecciona texto primero)"><strong>N</strong></button>
+      <button type="button" class="fmt-btn" id="fmtUnderline" title="Subrayado (selecciona texto primero)"><u>S</u></button>
+      <input type="color" id="fmtColorPicker" title="Color de texto" value="#ffcc22">
+      <button type="button" class="fmt-btn" id="fmtColor" title="Aplicar color al texto seleccionado" style="width:auto;padding:0 10px;font-size:9px;">COLOR</button>
+      <span class="fmt-hint">selecciona texto y aplica el formato</span>
+    </div>
+
+    <textarea id="f-content" style="min-height:180px;" placeholder="Escribe tu post aquí. Deja una línea en blanco entre párrafos."></textarea>
+    <div class="hint">* separa los párrafos con una línea en blanco. "+ ADJUNTAR ARCHIVO" sirve para imágenes, audio o texto (se detecta solo); para YouTube, un tweet o Discord usa "+ INSERTAR ENLACE" o pega el enlace solo en su línea.</div>
+
+    <div class="img-picker" id="insertPanel" style="display:none; margin-top:14px;">
+      <div class="img-tabs">
+        <button type="button" class="img-tab active" data-picker="insert" data-mode="url">PEGAR URL</button>
+        <button type="button" class="img-tab" data-picker="insert" data-mode="file">SUBIR ARCHIVO</button>
+      </div>
+      <div class="img-pane active" data-picker="insert" data-mode="url">
+        <input type="text" id="insert-url" placeholder="https://ejemplo.com/archivo.png / .mp3 / .txt">
+      </div>
+      <div class="img-pane" data-picker="insert" data-mode="file">
+        <input type="file" id="insert-file" accept="image/*,audio/*,text/*,.txt,.md,.csv,.json">
+        <div class="hint">* se detecta solo si es imagen, audio, texto u otro tipo de archivo.</div>
+      </div>
+      <div class="img-alt-row">
+        <label for="insert-alt">ETIQUETA / TEXTO ALTERNATIVO (opcional)</label>
+        <input type="text" id="insert-alt" placeholder="Captura de mi proyecto / Grabación de la clase / etc.">
+      </div>
+      <label class="nsfw-check" id="insert-nsfw-row" style="display:none;"><input type="checkbox" id="insert-nsfw"> Marcar como NSFW (se muestra difuminada con advertencia)</label>
+      <div class="img-preview" id="insert-preview"></div>
+      <div class="upload-status" id="insert-upload-status"></div>
+      <div class="btn-row" style="margin-top:14px;">
+        <button type="button" class="btn btn-gold" id="insertImgBtn">INSERTAR EN EL TEXTO</button>
+        <button type="button" class="btn" id="cancelInsertBtn">CANCELAR</button>
+      </div>
+    </div>
+
+    <div class="img-picker" id="linkPanel" style="display:none; margin-top:14px;">
+      <div class="field" style="margin-bottom:0;">
+        <label for="link-url">ENLACE (YouTube, Twitter/X o Discord)</label>
+        <input type="text" id="link-url" placeholder="https://www.youtube.com/watch?v=... / https://x.com/.../status/... / https://discord.gg/...">
+        <div class="hint" id="link-type-hint">Pega el enlace para reconocer el tipo automáticamente.</div>
+      </div>
+      <div class="btn-row" style="margin-top:14px;">
+        <button type="button" class="btn btn-gold" id="insertLinkBtn">INSERTAR ENLACE</button>
+        <button type="button" class="btn" id="cancelLinkBtn">CANCELAR</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-gold" id="genBtn">GENERAR CAMBIOS</button>
+  </div>
+
+  <div id="outputWrap" style="display:none;">
+    <div class="divider" style="margin-bottom:20px;"><span class="mark">◆</span></div>
+
+    <div class="field">
+      <label>VISTA PREVIA</label>
+      <div class="post-card" style="cursor:default;" id="previewCard"></div>
+    </div>
+
+    <div class="field">
+      <label>CÓDIGO ACTUALIZADO</label>
+      <div class="code-box">
+        <button class="copy-btn" id="copyBtn">COPIAR</button>
+        <pre id="codeOutput"></pre>
+      </div>
+      <div class="hint">* esto va a reemplazar la entrada original dentro de <code>posts-data.js</code>.</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-gold" id="publishBtn">GUARDAR CAMBIOS EN GITHUB</button>
+      <button class="btn" id="downloadBtn">DESCARGAR .JS</button>
+    </div>
+
+    <div id="publishStatus"></div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="copy">TU NOMBRE © 2026. Hecho con determinación (y un poco de café).</div>
+</footer>
+
+<script src="stars.js"></script>
+<script src="posts-data.js"></script>
+<script src="post-render.js"></script>
+<script src="github-auth.js"></script>
+<script src="post-editor.js"></script>
+<script>
+let editingSlug = null;
+
+window.onGithubLogin = function(){
+  document.getElementById('formWrap').style.display = 'none';
+  document.getElementById('selectView').style.display = 'block';
+  loadPostsIntoSelectList();
+};
+
+function loadPostsIntoSelectList(){
+  const selectList = document.getElementById('selectList');
+  selectList.innerHTML = '';
+  const sorted = [...POSTS].sort((a,b)=> new Date(b.date) - new Date(a.date));
+
+  if(sorted.length === 0){
+    selectList.innerHTML = '<div class="empty-note">* todavía no hay posts para editar...</div>';
+    return;
+  }
+
+  sorted.forEach(post=>{
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'select-card';
+    const coverHtml = post.cover
+      ? `<img class="sc-cover" src="${post.cover}" alt="">`
+      : `<div class="sc-cover-fallback">SIN<br>PORTADA</div>`;
+    card.innerHTML = `
+      ${coverHtml}
+      <div class="sc-info">
+        <div class="sc-title">${post.title}</div>
+        <div class="sc-date">${formatDate(post.date)}</div>
+      </div>
+      <span class="sc-action">EDITAR →</span>
+    `;
+    card.addEventListener('click', ()=> startEditing(post));
+    selectList.appendChild(card);
+  });
+}
+
+function startEditing(post){
+  editingSlug = post.slug;
+  document.getElementById('editingTitle').textContent = post.title;
+
+  document.getElementById('f-title').value = post.title;
+  document.getElementById('f-date').value = post.date;
+  document.getElementById('f-tags').value = (post.tags || []).join(', ');
+  document.getElementById('f-excerpt').value = post.excerpt;
+  document.getElementById('f-content').value = post.content;
+
+  setCoverState(post.cover || '', post.coverNsfw || false);
+
+  document.getElementById('outputWrap').style.display = 'none';
+  document.getElementById('publishStatus').innerHTML = '';
+
+  document.getElementById('selectView').style.display = 'none';
+  document.getElementById('formWrap').style.display = 'flex';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.getElementById('cancelEditBtn').addEventListener('click', ()=>{
+  document.getElementById('formWrap').style.display = 'none';
+  document.getElementById('selectView').style.display = 'block';
+});
+
+initGithubLogin();
+initPostEditor();
+
+document.getElementById('genBtn').addEventListener('click', ()=>{
+  const title = document.getElementById('f-title').value.trim();
+  const dateVal = document.getElementById('f-date').value;
+  const tagsRaw = document.getElementById('f-tags').value.trim();
+  const excerpt = document.getElementById('f-excerpt').value.trim();
+  const content = document.getElementById('f-content').value.trim();
+
+  if(!title || !dateVal || !excerpt || !content){
+    alert('Falta llenar título, fecha, extracto o contenido.');
+    return;
+  }
+
+  const tags = tagsRaw ? tagsRaw.split(',').map(t=>t.trim().toLowerCase()).filter(Boolean) : [];
+
+  const code = buildPostObjectCode({slug: editingSlug, title, date: dateVal, tags, cover: coverSrc, coverNsfw, excerpt, content});
+  document.getElementById('codeOutput').textContent = code;
+
+  document.getElementById('previewCard').innerHTML = renderPostCardInner({
+    title, date: dateVal, tags, excerpt, cover: coverSrc, coverNsfw
+  });
+
+  document.getElementById('publishStatus').innerHTML = '';
+  document.getElementById('outputWrap').style.display = 'block';
+  document.getElementById('outputWrap').scrollIntoView({behavior:'smooth', block:'start'});
+});
+
+document.getElementById('copyBtn').addEventListener('click', ()=>{
+  const text = document.getElementById('codeOutput').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.getElementById('copyBtn');
+    const original = btn.textContent;
+    btn.textContent = 'COPIADO';
+    setTimeout(()=> btn.textContent = original, 1500);
+  });
+});
+
+document.getElementById('downloadBtn').addEventListener('click', ()=>{
+  const code = document.getElementById('codeOutput').textContent;
+  const blob = new Blob([code], {type:'text/javascript'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (editingSlug || 'post-editado') + '.js';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+function setStatus(html, type){
+  document.getElementById('publishStatus').innerHTML = `<div class="status-msg ${type}">${html}</div>`;
+}
+
+document.getElementById('publishBtn').addEventListener('click', async ()=>{
+  const auth = getAuth();
+  if(!auth){ ghShowLogin(); return; }
+  const codeBlock = document.getElementById('codeOutput').textContent;
+  if(!codeBlock){ alert('Genera los cambios primero.'); return; }
+
+  const publishBtn = document.getElementById('publishBtn');
+  publishBtn.disabled = true;
+  setStatus('Conectando con GitHub...', 'info');
+
+  try{
+    const { content, sha, apiBase } = await fetchPostsFile(auth);
+    const objects = extractPostObjects(content);
+    const updatedContent = replacePostObject(content, objects, editingSlug, codeBlock);
+
+    const title = document.getElementById('f-title').value.trim() || 'sin título';
+    const commitUrl = await putPostsFile(auth, apiBase, updatedContent, sha, `Editar post: ${title}`);
+
+    setStatus(
+      `Cambios guardados. GitHub Pages puede tardar uno o dos minutos en reconstruir el sitio.` +
+      (commitUrl ? ` <a href="${commitUrl}" target="_blank" rel="noopener">Ver commit en GitHub →</a>` : ''),
+      'success'
+    );
+  }catch(err){
+    setStatus(err.message || 'Algo salió mal al guardar.', 'error');
+  }finally{
+    publishBtn.disabled = false;
+  }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Borrar entrada — TU NOMBRE</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="stars"></div>
+
+<nav>
+  <a href="index.html" class="nav-logo">TU<span class="heart">♥</span>NOMBRE</a>
+  <ul class="nav-links">
+    <li><a href="index.html#inicio">INICIO</a></li>
+    <li><a href="blog.html">BLOG</a></li>
+  </ul>
+</nav>
+
+<header class="page-header">
+  <h1>* BORRAR ENTRADA</h1>
+  <p>Elige un post y confírmalo. Se borra directo del repositorio — no hay deshacer.</p>
+</header>
+
+<!-- ================= LOGIN ================= -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <h2>* INICIAR SESIÓN</h2>
+    <form id="loginForm">
+      <div class="field">
+        <label for="l-repo">REPOSITORIO (usuario/repositorio)</label>
+        <input type="text" id="l-repo" placeholder="tu-usuario/mi-pagina" required>
+      </div>
+      <div class="field">
+        <label for="l-token">TOKEN DE ACCESO PERSONAL (GITHUB)</label>
+        <input type="password" id="l-token" placeholder="github_pat_xxxxxxxxxxxx" required>
+        <div class="hint">
+          Créalo en GitHub → Settings → Developer settings → Fine-grained tokens.
+          Dale acceso <strong>solo a este repositorio</strong> y permiso de
+          "Contents: Read and write".
+        </div>
+      </div>
+
+      <button type="button" class="btn" id="advancedToggle" style="margin-bottom:16px;">OPCIONES AVANZADAS ▾</button>
+      <div id="advancedFields" style="display:none;">
+        <div class="field">
+          <label for="l-branch">RAMA</label>
+          <input type="text" id="l-branch" placeholder="main" value="main">
+        </div>
+        <div class="field">
+          <label for="l-path">RUTA DEL ARCHIVO DE POSTS</label>
+          <input type="text" id="l-path" placeholder="posts-data.js" value="posts-data.js">
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button type="submit" class="btn btn-gold">ENTRAR</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= SESSION BAR ================= -->
+<div class="session-bar" id="sessionBar" style="display:none;">
+  <span class="who" id="whoText"></span>
+  <button class="btn" id="logoutBtn">CERRAR SESIÓN</button>
+</div>
+
+<!-- ================= SELECCIÓN DE POST ================= -->
+<div id="selectView" style="display:none;">
+  <p style="text-align:center;font-size:12px;color:var(--dim);max-width:440px;margin:0 auto 24px;padding:0 20px;">
+    Elige qué entrada quieres borrar.
+  </p>
+  <div class="select-list" id="selectList"></div>
+</div>
+
+<!-- ================= CONFIRMACIÓN ================= -->
+<div class="form-wrap" id="formWrap" style="display:none;max-width:520px;">
+  <div class="danger-box">
+    <h3>¿BORRAR ESTA ENTRADA?</h3>
+    <div class="post-card" style="cursor:default;margin-bottom:20px;text-align:left;" id="deletePreviewCard"></div>
+    <p>
+      Esta acción no se puede deshacer. El post se elimina de
+      <code>posts-data.js</code> con un commit directo a tu repositorio.
+      Las imágenes o archivos que subiste para este post se quedan en la
+      carpeta <code>images/</code> — puedes borrarlos a mano desde GitHub
+      si ya no los necesitas.
+    </p>
+    <div class="btn-row">
+      <button class="btn-danger" id="confirmDeleteBtn">SÍ, BORRAR DEFINITIVAMENTE</button>
+      <button class="btn" id="cancelDeleteBtn">CANCELAR</button>
+    </div>
+    <div id="publishStatus"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="copy">TU NOMBRE © 2026. Hecho con determinación (y un poco de café).</div>
+</footer>
+
+<script src="stars.js"></script>
+<script src="posts-data.js"></script>
+<script src="post-render.js"></script>
+<script src="github-auth.js"></script>
+<script>
+let localPosts = [];
+let deletingSlug = null;
+
+window.onGithubLogin = function(){
+  document.getElementById('formWrap').style.display = 'none';
+  document.getElementById('selectView').style.display = 'block';
+  loadPostsIntoSelectList();
+};
+
+function loadPostsIntoSelectList(){
+  localPosts = [...POSTS].sort((a,b)=> new Date(b.date) - new Date(a.date));
+  renderSelectList();
+}
+
+function renderSelectList(){
+  const selectList = document.getElementById('selectList');
+  selectList.innerHTML = '';
+
+  if(localPosts.length === 0){
+    selectList.innerHTML = '<div class="empty-note">* no quedan posts...</div>';
+    return;
+  }
+
+  localPosts.forEach(post=>{
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'select-card';
+    const coverHtml = post.cover
+      ? `<img class="sc-cover" src="${post.cover}" alt="">`
+      : `<div class="sc-cover-fallback">SIN<br>PORTADA</div>`;
+    card.innerHTML = `
+      ${coverHtml}
+      <div class="sc-info">
+        <div class="sc-title">${post.title}</div>
+        <div class="sc-date">${formatDate(post.date)}</div>
+      </div>
+      <span class="sc-action" style="color:#ff6b6b;">BORRAR →</span>
+    `;
+    card.addEventListener('click', ()=> confirmDelete(post));
+    selectList.appendChild(card);
+  });
+}
+
+function confirmDelete(post){
+  deletingSlug = post.slug;
+  document.getElementById('deletePreviewCard').innerHTML = renderPostCardInner(post);
+  document.getElementById('publishStatus').innerHTML = '';
+  document.getElementById('selectView').style.display = 'none';
+  document.getElementById('formWrap').style.display = 'flex';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.getElementById('cancelDeleteBtn').addEventListener('click', ()=>{
+  document.getElementById('formWrap').style.display = 'none';
+  document.getElementById('selectView').style.display = 'block';
+});
+
+function setStatus(html, type){
+  document.getElementById('publishStatus').innerHTML = `<div class="status-msg ${type}">${html}</div>`;
+}
+
+document.getElementById('confirmDeleteBtn').addEventListener('click', async ()=>{
+  const auth = getAuth();
+  if(!auth){ ghShowLogin(); return; }
+
+  const btn = document.getElementById('confirmDeleteBtn');
+  btn.disabled = true;
+  setStatus('Conectando con GitHub...', 'info');
+
+  try{
+    const { content, sha, apiBase } = await fetchPostsFile(auth);
+    const objects = extractPostObjects(content);
+    const postInfo = localPosts.find(p => p.slug === deletingSlug) || {};
+    const updatedContent = removePostObject(content, objects, deletingSlug);
+    const commitUrl = await putPostsFile(auth, apiBase, updatedContent, sha, `Borrar post: ${postInfo.title || deletingSlug}`);
+
+    setStatus(
+      `Post borrado. GitHub Pages puede tardar uno o dos minutos en reconstruir el sitio.` +
+      (commitUrl ? ` <a href="${commitUrl}" target="_blank" rel="noopener">Ver commit en GitHub →</a>` : ''),
+      'success'
+    );
+
+    localPosts = localPosts.filter(p => p.slug !== deletingSlug);
+    setTimeout(()=>{
+      document.getElementById('formWrap').style.display = 'none';
+      document.getElementById('selectView').style.display = 'block';
+      renderSelectList();
+    }, 1800);
+  }catch(err){
+    setStatus(err.message || 'Algo salió mal al borrar.', 'error');
+  }finally{
+    btn.disabled = false;
+  }
+});
+
+initGithubLogin();
+</script>
+
+</body>
+</html>
