@@ -192,6 +192,23 @@ footer .copy{font-size:10px;color:var(--dim);letter-spacing:.5px;line-height:1.7
 .post-detail .pd-body figure img{width:100%;border:1px solid var(--border);display:block;}
 .post-detail .pd-body figure figcaption{font-size:10px;color:var(--dim);text-align:center;margin-top:8px;letter-spacing:.5px;}
 
+/* ---------- embeds: youtube / twitter / discord ---------- */
+.pd-body .embed-block{margin:32px 0;display:flex;justify-content:center;}
+.pd-body .video-frame{position:relative;width:100%;max-width:640px;aspect-ratio:16/9;border:1px solid var(--border);background:#000;overflow:hidden;}
+.pd-body .video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+.pd-body .embed-tweet{width:100%;max-width:550px;}
+.pd-body blockquote.twitter-tweet{
+  margin:0 auto;max-width:550px;border:1px solid var(--border);background:var(--panel);
+  color:var(--dim);padding:16px;font-size:12px;line-height:1.7;font-family:var(--pixel);
+}
+.pd-body blockquote.twitter-tweet a{color:var(--gold);}
+.discord-card{display:flex;align-items:center;gap:14px;border:1px solid var(--border);background:var(--panel);padding:16px 20px;text-decoration:none;color:var(--white);transition:border-color .15s;max-width:420px;}
+.discord-card:hover{border-color:var(--gold);}
+.discord-icon{width:36px;height:36px;flex:none;border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:var(--pixel);font-size:11px;color:var(--gold);}
+.discord-text{display:flex;flex-direction:column;gap:6px;font-size:11px;}
+.discord-text strong{color:var(--white);letter-spacing:.5px;}
+.discord-sub{font-size:10px;color:var(--dim);word-break:break-all;}
+
 /* ================= NEW POST FORM ================= */
 .form-wrap{max-width:640px;margin:0 auto;padding:0 20px 60px;position:relative;z-index:1;display:flex;flex-direction:column;gap:22px;}
 .field label{display:block;font-size:10px;letter-spacing:.5px;color:var(--gold);margin-bottom:8px;}
