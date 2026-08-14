@@ -29,16 +29,7 @@
 */
 
 const POSTS = [
-  {
-    slug: "test-3",
-    title: "PRUEBA DE EDICION",
-    date: "2026-02-07",
-    tags: ["test"],
-    cover: "images/1786690867581-screenshot-2026-06-23-182022.png",
-    coverNsfw: true,
-    excerpt: "PRUEBA DE EDIT",
-    content: "[color=#ffcc22]**TEST 1**[/color]\n\n[archivo:](images/1786690960800-fart-with-extra-reverb.mp3)\n\n\n\nhttps://x.com/pepinoxs32/status/2088040747048063104?s=20"
-  },
+  
   
   {
     slug: "fin-de-cubikasmp-temporada-3-muchas-gracias-por-jugar",
