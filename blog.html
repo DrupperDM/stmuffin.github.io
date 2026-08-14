@@ -52,6 +52,7 @@
 <script src="stars.js"></script>
 <script src="posts-data.js"></script>
 <script src="post-render.js"></script>
+<script src="comments.js"></script>
 <script>
 const listView = document.getElementById('listView');
 const detailView = document.getElementById('detailView');
@@ -123,15 +124,23 @@ function openPost(slug){
     <div class="pd-tags">${(post.tags||[]).map(t=>`<span class="pill">${t}</span>`).join('')}</div>
     ${coverHtml}
     <div class="pd-body">${bodyHtml}</div>
+
+    <div class="pd-comments-block">
+      <div class="divider"><span class="mark">*</span></div>
+      <h2>* COMENTARIOS</h2>
+      <div id="graphcomment"></div>
+    </div>
   `;
 
   pendingTextFiles.forEach(({id, path}) => loadTextFile(id, path));
   if(detailView.querySelector('.twitter-tweet')) loadTwitterWidgets(detailView);
+  mountComments(post);
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
 function closeDetail(){
   history.replaceState(null,'',location.pathname);
+  unmountComments();
   detailView.style.display = 'none';
   listView.style.display = 'block';
 }
