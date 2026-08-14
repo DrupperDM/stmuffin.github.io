@@ -230,8 +230,29 @@ footer .copy{font-size:10px;color:var(--dim);letter-spacing:.5px;line-height:1.7
 .img-preview.show{display:block;}
 .img-alt-row{margin-top:12px;}
 .img-alt-row label{display:block;font-size:9px;color:var(--gold);margin-bottom:6px;letter-spacing:.5px;}
+.upload-status{font-size:9px;letter-spacing:.5px;margin-top:8px;line-height:1.6;min-height:12px;}
+.upload-status.info{color:var(--dim);}
+.upload-status.success{color:var(--gold);}
+.upload-status.error{color:#ff6b6b;}
 .toolbar-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
 .toolbar-row label{margin-bottom:0;}
+
+/* ---------- login gate ---------- */
+.login-screen{max-width:440px;margin:60px auto;padding:0 20px;position:relative;z-index:1;}
+.login-box{border:1px solid var(--border);background:var(--panel);padding:30px 26px;}
+.login-box h2{font-family:var(--pixel);font-size:14px;letter-spacing:1px;color:var(--gold);margin-bottom:16px;text-align:center;}
+.login-box .field{margin-bottom:16px;}
+.login-box .field:last-of-type{margin-bottom:0;}
+.session-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;max-width:640px;margin:0 auto 24px;padding:0 20px;position:relative;z-index:1;}
+.session-bar .who{font-size:10px;color:var(--dim);letter-spacing:.5px;}
+.session-bar .who strong{color:var(--gold);}
+
+/* ---------- status messages ---------- */
+.status-msg{font-size:11px;line-height:1.8;padding:14px 16px;border:1px solid var(--border);margin-top:14px;}
+.status-msg.info{color:var(--dim);}
+.status-msg.success{color:var(--gold);border-color:var(--gold-dim);}
+.status-msg.error{color:#ff6b6b;border-color:#5c1f1f;}
+.status-msg a{color:inherit;text-decoration:underline;}
 
 @media (max-width:560px){
   nav{flex-direction:column;gap:10px;padding:12px 16px;}
