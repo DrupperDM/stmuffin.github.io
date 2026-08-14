@@ -126,10 +126,13 @@
   <div class="field">
     <div class="toolbar-row">
       <label for="f-content">CONTENIDO</label>
-      <button type="button" class="btn" id="toggleImgInsert">+ INSERTAR IMAGEN</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button type="button" class="btn" id="toggleImgInsert">+ INSERTAR IMAGEN</button>
+        <button type="button" class="btn" id="toggleLinkInsert">+ INSERTAR ENLACE</button>
+      </div>
     </div>
     <textarea id="f-content" style="min-height:180px;" placeholder="Escribe tu post aquí. Deja una línea en blanco entre párrafos."></textarea>
-    <div class="hint">* separa los párrafos con una línea en blanco. Para poner una imagen en medio del texto, ubica el cursor donde la quieras y usa el botón "+ INSERTAR IMAGEN" de arriba.</div>
+    <div class="hint">* separa los párrafos con una línea en blanco. Para poner una imagen en medio del texto usa "+ INSERTAR IMAGEN"; para un video de YouTube, un tweet o una invitación de Discord usa "+ INSERTAR ENLACE" (o simplemente pega el enlace solo en su propia línea).</div>
 
     <div class="img-picker" id="insertPanel" style="display:none; margin-top:14px;">
       <div class="img-tabs">
@@ -151,6 +154,18 @@
       <div class="btn-row" style="margin-top:14px;">
         <button type="button" class="btn btn-gold" id="insertImgBtn">INSERTAR EN EL TEXTO</button>
         <button type="button" class="btn" id="cancelInsertBtn">CANCELAR</button>
+      </div>
+    </div>
+
+    <div class="img-picker" id="linkPanel" style="display:none; margin-top:14px;">
+      <div class="field" style="margin-bottom:0;">
+        <label for="link-url">ENLACE (YouTube, Twitter/X o Discord)</label>
+        <input type="text" id="link-url" placeholder="https://www.youtube.com/watch?v=... / https://x.com/.../status/... / https://discord.gg/...">
+        <div class="hint" id="link-type-hint">Pega el enlace para reconocer el tipo automáticamente.</div>
+      </div>
+      <div class="btn-row" style="margin-top:14px;">
+        <button type="button" class="btn btn-gold" id="insertLinkBtn">INSERTAR ENLACE</button>
+        <button type="button" class="btn" id="cancelLinkBtn">CANCELAR</button>
       </div>
     </div>
   </div>
@@ -457,6 +472,76 @@ document.getElementById('insertImgBtn').addEventListener('click', ()=>{
   contentField.focus();
 });
 
+/* ---------- link embed detection ---------- */
+function getYoutubeId(url){
+  try{
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./,'').replace(/^m\./,'');
+    if(host === 'youtu.be') return u.pathname.split('/').filter(Boolean)[0] || null;
+    if(host === 'youtube.com'){
+      if(u.pathname === '/watch') return u.searchParams.get('v');
+      const parts = u.pathname.split('/').filter(Boolean);
+      if(parts[0] === 'embed' || parts[0] === 'shorts') return parts[1] || null;
+    }
+    return null;
+  }catch(e){ return null; }
+}
+
+function isTwitterUrl(url){
+  try{
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./,'');
+    return (host === 'twitter.com' || host === 'x.com') && /\/status\/\d+/.test(u.pathname);
+  }catch(e){ return false; }
+}
+
+function isDiscordInvite(url){
+  try{
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./,'');
+    return host === 'discord.gg' || (host === 'discord.com' && u.pathname.startsWith('/invite/'));
+  }catch(e){ return false; }
+}
+
+const linkPanel = document.getElementById('linkPanel');
+
+document.getElementById('toggleLinkInsert').addEventListener('click', ()=>{
+  lastCursorPos = contentField.selectionStart;
+  linkPanel.style.display = linkPanel.style.display === 'none' ? 'block' : 'none';
+});
+
+document.getElementById('cancelLinkBtn').addEventListener('click', ()=>{
+  linkPanel.style.display = 'none';
+});
+
+document.getElementById('link-url').addEventListener('input', (e)=>{
+  const url = e.target.value.trim();
+  const hint = document.getElementById('link-type-hint');
+  if(!url){ hint.textContent = 'Pega el enlace para reconocer el tipo automáticamente.'; return; }
+  if(getYoutubeId(url)) hint.textContent = '✔ Video de YouTube — se insertará centrado.';
+  else if(isTwitterUrl(url)) hint.textContent = '✔ Publicación de Twitter/X.';
+  else if(isDiscordInvite(url)) hint.textContent = '✔ Invitación de Discord.';
+  else hint.textContent = 'No lo reconozco como YouTube, Twitter/X o Discord — se insertará como texto normal.';
+});
+
+document.getElementById('insertLinkBtn').addEventListener('click', ()=>{
+  const url = document.getElementById('link-url').value.trim();
+  if(!url){
+    alert('Pega un enlace primero.');
+    return;
+  }
+  const snippet = `\n\n${url}\n\n`;
+  const pos = lastCursorPos !== null ? lastCursorPos : contentField.value.length;
+  const before = contentField.value.slice(0, pos);
+  const after = contentField.value.slice(pos);
+  contentField.value = before + snippet + after;
+
+  document.getElementById('link-url').value = '';
+  document.getElementById('link-type-hint').textContent = 'Pega el enlace para reconocer el tipo automáticamente.';
+  linkPanel.style.display = 'none';
+  contentField.focus();
+});
+
 /* ================= GENERATE POST OBJECT ================= */
 document.getElementById('genBtn').addEventListener('click', ()=>{
   const title = document.getElementById('f-title').value.trim();
@@ -616,6 +701,7 @@ document.getElementById('publishBtn').addEventListener('click', async ()=>{
 </script>
 
 </body>
+</html>
 </html>
 </body>
 </html>
