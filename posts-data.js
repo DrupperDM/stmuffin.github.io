@@ -30,6 +30,16 @@
 
 const POSTS = [
   {
+    slug: "test-3",
+    title: "test 3",
+    date: "2006-02-11",
+    tags: ["test"],
+    cover: "images/1786690867581-screenshot-2026-06-23-182022.png",
+    coverNsfw: true,
+    excerpt: "test 3",
+    content: "[color=#ffcc22]**TEST 1**[/color]\n\n[archivo:](images/1786690960800-fart-with-extra-reverb.mp3)\n\n\n\nhttps://x.com/himetwilight/status/2087847687865450723?s=20"
+  },
+  {
     slug: "test3",
     title: "test3",
     date: "2026-11-21",
