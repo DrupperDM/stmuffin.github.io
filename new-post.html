@@ -65,10 +65,8 @@
       "detrás" que verifique un usuario y contraseña. El token de arriba hace
       esa función: es tu llave personal para escribir en tu repositorio. Se
       guarda solo en la memoria de esta pestaña (<code>sessionStorage</code>)
-      y desaparece al cerrarla — nunca se sube a GitHub ni se envía a ningún
-      otro lugar más que a la API oficial de GitHub. Si alguien más abre esta
-      página sin tu token, simplemente no podrá publicar nada: GitHub
-      rechazará la petición.
+      y desaparece al cerrarla. Si alguien más abre esta página sin tu
+      token, simplemente no podrá publicar nada: GitHub rechazará la petición.
     </div>
   </div>
 </div>
@@ -110,9 +108,10 @@
       </div>
       <div class="img-pane" data-picker="cover" data-mode="file">
         <input type="file" id="cover-file" accept="image/*">
-        <div class="hint">* al elegir un archivo se sube automáticamente a la carpeta <code>images/</code> de tu repositorio (necesitas haber iniciado sesión). Espera a que diga "imagen subida" antes de generar la entrada.</div>
+        <div class="hint">* se sube automáticamente a la carpeta <code>images/</code> de tu repositorio. Espera a que diga "imagen subida" antes de generar la entrada.</div>
       </div>
-      <div class="img-preview" id="cover-preview"><img id="cover-preview-img" alt=""></div>
+      <label class="nsfw-check"><input type="checkbox" id="cover-nsfw"> Marcar como NSFW (se muestra difuminada con advertencia)</label>
+      <div class="img-preview" id="cover-preview"></div>
       <div class="upload-status" id="cover-upload-status"></div>
     </div>
   </div>
@@ -127,12 +126,21 @@
     <div class="toolbar-row">
       <label for="f-content">CONTENIDO</label>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button type="button" class="btn" id="toggleImgInsert">+ INSERTAR IMAGEN</button>
+        <button type="button" class="btn" id="toggleImgInsert">+ ADJUNTAR ARCHIVO</button>
         <button type="button" class="btn" id="toggleLinkInsert">+ INSERTAR ENLACE</button>
       </div>
     </div>
+
+    <div class="format-toolbar">
+      <button type="button" class="fmt-btn" id="fmtBold" title="Negrita (selecciona texto primero)"><strong>N</strong></button>
+      <button type="button" class="fmt-btn" id="fmtUnderline" title="Subrayado (selecciona texto primero)"><u>S</u></button>
+      <input type="color" id="fmtColorPicker" title="Color de texto" value="#ffcc22">
+      <button type="button" class="fmt-btn" id="fmtColor" title="Aplicar color al texto seleccionado" style="width:auto;padding:0 10px;font-size:9px;">COLOR</button>
+      <span class="fmt-hint">selecciona texto y aplica el formato</span>
+    </div>
+
     <textarea id="f-content" style="min-height:180px;" placeholder="Escribe tu post aquí. Deja una línea en blanco entre párrafos."></textarea>
-    <div class="hint">* separa los párrafos con una línea en blanco. Para poner una imagen en medio del texto usa "+ INSERTAR IMAGEN"; para un video de YouTube, un tweet o una invitación de Discord usa "+ INSERTAR ENLACE" (o simplemente pega el enlace solo en su propia línea).</div>
+    <div class="hint">* separa los párrafos con una línea en blanco. "+ ADJUNTAR ARCHIVO" sirve para imágenes, audio o texto (se detecta solo); para YouTube, un tweet o Discord usa "+ INSERTAR ENLACE" o pega el enlace solo en su línea.</div>
 
     <div class="img-picker" id="insertPanel" style="display:none; margin-top:14px;">
       <div class="img-tabs">
@@ -140,16 +148,18 @@
         <button type="button" class="img-tab" data-picker="insert" data-mode="file">SUBIR ARCHIVO</button>
       </div>
       <div class="img-pane active" data-picker="insert" data-mode="url">
-        <input type="text" id="insert-url" placeholder="https://ejemplo.com/mi-imagen.png">
+        <input type="text" id="insert-url" placeholder="https://ejemplo.com/archivo.png / .mp3 / .txt">
       </div>
       <div class="img-pane" data-picker="insert" data-mode="file">
-        <input type="file" id="insert-file" accept="image/*">
+        <input type="file" id="insert-file" accept="image/*,audio/*,text/*,.txt,.md,.csv,.json">
+        <div class="hint">* se detecta solo si es imagen, audio, texto u otro tipo de archivo, y se sube a <code>images/</code>.</div>
       </div>
       <div class="img-alt-row">
-        <label for="insert-alt">TEXTO ALTERNATIVO (describe la imagen, para accesibilidad)</label>
-        <input type="text" id="insert-alt" placeholder="Captura de mi proyecto corriendo en local">
+        <label for="insert-alt">ETIQUETA / TEXTO ALTERNATIVO (opcional)</label>
+        <input type="text" id="insert-alt" placeholder="Captura de mi proyecto / Grabación de la clase / etc.">
       </div>
-      <div class="img-preview" id="insert-preview"><img id="insert-preview-img" alt=""></div>
+      <label class="nsfw-check" id="insert-nsfw-row" style="display:none;"><input type="checkbox" id="insert-nsfw"> Marcar como NSFW (se muestra difuminada con advertencia)</label>
+      <div class="img-preview" id="insert-preview"></div>
       <div class="upload-status" id="insert-upload-status"></div>
       <div class="btn-row" style="margin-top:14px;">
         <button type="button" class="btn btn-gold" id="insertImgBtn">INSERTAR EN EL TEXTO</button>
@@ -206,343 +216,13 @@
 </footer>
 
 <script src="stars.js"></script>
+<script src="post-render.js"></script>
+<script src="github-auth.js"></script>
+<script src="post-editor.js"></script>
 <script>
-/* ================= AUTH / LOGIN ================= */
-function getAuth(){
-  const raw = sessionStorage.getItem('gh_auth');
-  return raw ? JSON.parse(raw) : null;
-}
+initGithubLogin();
+initPostEditor();
 
-function showApp(){
-  const auth = getAuth();
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('sessionBar').style.display = 'flex';
-  document.getElementById('formWrap').style.display = 'flex';
-  document.getElementById('whoText').innerHTML = `Conectado como <strong>${auth.owner}/${auth.repo}</strong> (${auth.branch})`;
-}
-
-function showLogin(){
-  document.getElementById('loginScreen').style.display = 'block';
-  document.getElementById('sessionBar').style.display = 'none';
-  document.getElementById('formWrap').style.display = 'none';
-}
-
-document.getElementById('advancedToggle').addEventListener('click', ()=>{
-  const box = document.getElementById('advancedFields');
-  const btn = document.getElementById('advancedToggle');
-  const open = box.style.display !== 'none';
-  box.style.display = open ? 'none' : 'block';
-  btn.textContent = open ? 'OPCIONES AVANZADAS ▾' : 'OPCIONES AVANZADAS ▴';
-});
-
-document.getElementById('loginForm').addEventListener('submit', (e)=>{
-  e.preventDefault();
-  const repoField = document.getElementById('l-repo').value.trim();
-  const branch = document.getElementById('l-branch').value.trim() || 'main';
-  const path = document.getElementById('l-path').value.trim() || 'posts-data.js';
-  const token = document.getElementById('l-token').value.trim();
-
-  const parts = repoField.split('/').map(p=>p.trim()).filter(Boolean);
-  if(parts.length !== 2 || !token){
-    alert('Escribe el repositorio como usuario/repositorio y pega tu token.');
-    return;
-  }
-  const [owner, repo] = parts;
-  sessionStorage.setItem('gh_auth', JSON.stringify({owner, repo, branch, path, token}));
-  showApp();
-});
-
-document.getElementById('logoutBtn').addEventListener('click', ()=>{
-  sessionStorage.removeItem('gh_auth');
-  showLogin();
-});
-
-if(getAuth()) showApp(); else showLogin();
-
-/* ================= HELPERS ================= */
-function slugify(text){
-  return text
-    .toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .replace(/[^a-z0-9\s-]/g,'')
-    .trim()
-    .replace(/\s+/g,'-')
-    .replace(/-+/g,'-');
-}
-
-function formatDate(iso){
-  const d = new Date(iso + 'T00:00:00');
-  const meses = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
-  return meses[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
-}
-
-function jsStringLiteral(str){
-  return JSON.stringify(str);
-}
-
-function fileToDataUrl(file){
-  return new Promise((resolve, reject)=>{
-    const reader = new FileReader();
-    reader.onload = ()=> resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-function utf8ToBase64(str){
-  const bytes = new TextEncoder().encode(str);
-  let binary = '';
-  bytes.forEach(b => binary += String.fromCharCode(b));
-  return btoa(binary);
-}
-
-function base64ToUtf8(b64){
-  const binary = atob(b64.replace(/\n/g,''));
-  const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
-  return new TextDecoder('utf-8').decode(bytes);
-}
-
-/* ---------- generic image picker wiring ---------- */
-let coverSrc = '';
-let insertSrc = '';
-
-function wireImgTabs(pickerName){
-  const tabs = document.querySelectorAll(`.img-tab[data-picker="${pickerName}"]`);
-  const panes = document.querySelectorAll(`.img-pane[data-picker="${pickerName}"]`);
-  tabs.forEach(tab=>{
-    tab.addEventListener('click', ()=>{
-      tabs.forEach(t=>t.classList.remove('active'));
-      panes.forEach(p=>p.classList.remove('active'));
-      tab.classList.add('active');
-      document.querySelector(`.img-pane[data-picker="${pickerName}"][data-mode="${tab.dataset.mode}"]`).classList.add('active');
-    });
-  });
-}
-wireImgTabs('cover');
-wireImgTabs('insert');
-
-function showPreview(previewId, src){
-  const wrap = document.getElementById(previewId);
-  const img = document.getElementById(previewId + '-img');
-  if(!src){
-    wrap.classList.remove('show');
-    return;
-  }
-  img.src = src;
-  wrap.classList.add('show');
-}
-
-function setUploadStatus(elId, text, type){
-  const el = document.getElementById(elId);
-  el.textContent = text;
-  el.className = 'upload-status ' + type;
-}
-
-function sanitizeFilename(name){
-  const dotIdx = name.lastIndexOf('.');
-  const ext = dotIdx !== -1 ? name.slice(dotIdx) : '';
-  const base = dotIdx !== -1 ? name.slice(0, dotIdx) : name;
-  const clean = base.normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
-  return (clean || 'imagen') + ext.toLowerCase();
-}
-
-function fileToBase64(file){
-  return new Promise((resolve, reject)=>{
-    const reader = new FileReader();
-    reader.onload = ()=> resolve(reader.result.split(',')[1]);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-let uploadsInProgress = 0;
-function trackUpload(promise){
-  uploadsInProgress++;
-  document.getElementById('genBtn').disabled = true;
-  promise.finally(()=>{
-    uploadsInProgress--;
-    document.getElementById('genBtn').disabled = uploadsInProgress > 0;
-  });
-  return promise;
-}
-
-async function uploadImageToGithub(file, auth){
-  const filename = `${Date.now()}-${sanitizeFilename(file.name)}`;
-  const base64 = await fileToBase64(file);
-  const apiUrl = `https://api.github.com/repos/${auth.owner}/${auth.repo}/contents/images/${filename}`;
-  const res = await fetch(apiUrl, {
-    method: 'PUT',
-    headers: {...authHeaders(auth), 'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      message: `Subir imagen: ${filename}`,
-      content: base64,
-      branch: auth.branch
-    })
-  });
-  if(!res.ok) throw new Error(await githubErrorMessage(res, 'No pude subir la imagen'));
-  return `images/${filename}`;
-}
-
-document.getElementById('cover-url').addEventListener('input', (e)=>{
-  coverSrc = e.target.value.trim();
-  showPreview('cover-preview', coverSrc);
-});
-document.getElementById('cover-file').addEventListener('change', async (e)=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  const auth = getAuth();
-  if(!auth){ alert('Inicia sesión primero.'); return; }
-
-  const localPreview = await fileToDataUrl(file);
-  showPreview('cover-preview', localPreview);
-  setUploadStatus('cover-upload-status', 'Subiendo imagen a images/ en GitHub...', 'info');
-  coverSrc = '';
-
-  trackUpload((async ()=>{
-    try{
-      const path = await uploadImageToGithub(file, auth);
-      coverSrc = path;
-      setUploadStatus('cover-upload-status', `✔ imagen subida: ${path}`, 'success');
-    }catch(err){
-      setUploadStatus('cover-upload-status', err.message || 'No se pudo subir la imagen.', 'error');
-    }
-  })());
-});
-
-document.getElementById('insert-url').addEventListener('input', (e)=>{
-  insertSrc = e.target.value.trim();
-  showPreview('insert-preview', insertSrc);
-});
-document.getElementById('insert-file').addEventListener('change', async (e)=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  const auth = getAuth();
-  if(!auth){ alert('Inicia sesión primero.'); return; }
-
-  const localPreview = await fileToDataUrl(file);
-  showPreview('insert-preview', localPreview);
-  setUploadStatus('insert-upload-status', 'Subiendo imagen a images/ en GitHub...', 'info');
-  insertSrc = '';
-
-  trackUpload((async ()=>{
-    try{
-      const path = await uploadImageToGithub(file, auth);
-      insertSrc = path;
-      setUploadStatus('insert-upload-status', `✔ imagen subida: ${path}`, 'success');
-    }catch(err){
-      setUploadStatus('insert-upload-status', err.message || 'No se pudo subir la imagen.', 'error');
-    }
-  })());
-});
-
-/* ---------- insert-image panel open/close ---------- */
-const insertPanel = document.getElementById('insertPanel');
-const contentField = document.getElementById('f-content');
-let lastCursorPos = null;
-
-document.getElementById('toggleImgInsert').addEventListener('click', ()=>{
-  lastCursorPos = contentField.selectionStart;
-  insertPanel.style.display = insertPanel.style.display === 'none' ? 'block' : 'none';
-});
-
-document.getElementById('cancelInsertBtn').addEventListener('click', ()=>{
-  insertPanel.style.display = 'none';
-});
-
-document.getElementById('insertImgBtn').addEventListener('click', ()=>{
-  if(!insertSrc){
-    alert('Pega una URL o sube un archivo de imagen primero.');
-    return;
-  }
-  const alt = document.getElementById('insert-alt').value.trim();
-  const snippet = `\n\n![${alt}](${insertSrc})\n\n`;
-  const pos = lastCursorPos !== null ? lastCursorPos : contentField.value.length;
-  const before = contentField.value.slice(0, pos);
-  const after = contentField.value.slice(pos);
-  contentField.value = before + snippet + after;
-
-  document.getElementById('insert-url').value = '';
-  document.getElementById('insert-file').value = '';
-  document.getElementById('insert-alt').value = '';
-  insertSrc = '';
-  showPreview('insert-preview', '');
-  setUploadStatus('insert-upload-status', '', 'info');
-  insertPanel.style.display = 'none';
-  contentField.focus();
-});
-
-/* ---------- link embed detection ---------- */
-function getYoutubeId(url){
-  try{
-    const u = new URL(url);
-    const host = u.hostname.replace(/^www\./,'').replace(/^m\./,'');
-    if(host === 'youtu.be') return u.pathname.split('/').filter(Boolean)[0] || null;
-    if(host === 'youtube.com'){
-      if(u.pathname === '/watch') return u.searchParams.get('v');
-      const parts = u.pathname.split('/').filter(Boolean);
-      if(parts[0] === 'embed' || parts[0] === 'shorts') return parts[1] || null;
-    }
-    return null;
-  }catch(e){ return null; }
-}
-
-function isTwitterUrl(url){
-  try{
-    const u = new URL(url);
-    const host = u.hostname.replace(/^www\./,'');
-    return (host === 'twitter.com' || host === 'x.com') && /\/status\/\d+/.test(u.pathname);
-  }catch(e){ return false; }
-}
-
-function isDiscordInvite(url){
-  try{
-    const u = new URL(url);
-    const host = u.hostname.replace(/^www\./,'');
-    return host === 'discord.gg' || (host === 'discord.com' && u.pathname.startsWith('/invite/'));
-  }catch(e){ return false; }
-}
-
-const linkPanel = document.getElementById('linkPanel');
-
-document.getElementById('toggleLinkInsert').addEventListener('click', ()=>{
-  lastCursorPos = contentField.selectionStart;
-  linkPanel.style.display = linkPanel.style.display === 'none' ? 'block' : 'none';
-});
-
-document.getElementById('cancelLinkBtn').addEventListener('click', ()=>{
-  linkPanel.style.display = 'none';
-});
-
-document.getElementById('link-url').addEventListener('input', (e)=>{
-  const url = e.target.value.trim();
-  const hint = document.getElementById('link-type-hint');
-  if(!url){ hint.textContent = 'Pega el enlace para reconocer el tipo automáticamente.'; return; }
-  if(getYoutubeId(url)) hint.textContent = '✔ Video de YouTube — se insertará centrado.';
-  else if(isTwitterUrl(url)) hint.textContent = '✔ Publicación de Twitter/X.';
-  else if(isDiscordInvite(url)) hint.textContent = '✔ Invitación de Discord.';
-  else hint.textContent = 'No lo reconozco como YouTube, Twitter/X o Discord — se insertará como texto normal.';
-});
-
-document.getElementById('insertLinkBtn').addEventListener('click', ()=>{
-  const url = document.getElementById('link-url').value.trim();
-  if(!url){
-    alert('Pega un enlace primero.');
-    return;
-  }
-  const snippet = `\n\n${url}\n\n`;
-  const pos = lastCursorPos !== null ? lastCursorPos : contentField.value.length;
-  const before = contentField.value.slice(0, pos);
-  const after = contentField.value.slice(pos);
-  contentField.value = before + snippet + after;
-
-  document.getElementById('link-url').value = '';
-  document.getElementById('link-type-hint').textContent = 'Pega el enlace para reconocer el tipo automáticamente.';
-  linkPanel.style.display = 'none';
-  contentField.focus();
-});
-
-/* ================= GENERATE POST OBJECT ================= */
 document.getElementById('genBtn').addEventListener('click', ()=>{
   const title = document.getElementById('f-title').value.trim();
   const dateVal = document.getElementById('f-date').value;
@@ -558,34 +238,12 @@ document.getElementById('genBtn').addEventListener('click', ()=>{
   const tags = tagsRaw ? tagsRaw.split(',').map(t=>t.trim().toLowerCase()).filter(Boolean) : [];
   const slug = slugify(title);
 
-  const tagsCode = '[' + tags.map(t => jsStringLiteral(t)).join(', ') + ']';
-  const contentCode = jsStringLiteral(content.replace(/\r\n/g,'\n'));
-  const coverLine = coverSrc ? `\n    cover: ${jsStringLiteral(coverSrc)},` : '';
-
-  const code =
-`  {
-    slug: ${jsStringLiteral(slug)},
-    title: ${jsStringLiteral(title)},
-    date: ${jsStringLiteral(dateVal)},
-    tags: ${tagsCode},${coverLine}
-    excerpt: ${jsStringLiteral(excerpt)},
-    content: ${contentCode}
-  },`;
-
+  const code = buildPostObjectCode({slug, title, date: dateVal, tags, cover: coverSrc, coverNsfw, excerpt, content});
   document.getElementById('codeOutput').textContent = code;
 
-  const coverHtml = coverSrc ? `<img class="pc-cover" src="${coverSrc}" alt="">` : '';
-  document.getElementById('previewCard').innerHTML = `
-    ${coverHtml}
-    <div class="pc-inner">
-      <div class="pc-top">
-        <span class="pc-title">${title}</span>
-        <span class="pc-date">${formatDate(dateVal)}</span>
-      </div>
-      <div class="pc-excerpt">${excerpt}</div>
-      <div class="pc-tags">${tags.map(t=>`<span class="pill">${t}</span>`).join('')}</div>
-    </div>
-  `;
+  document.getElementById('previewCard').innerHTML = renderPostCardInner({
+    title, date: dateVal, tags, excerpt, cover: coverSrc, coverNsfw
+  });
 
   document.getElementById('publishStatus').innerHTML = '';
   document.getElementById('outputWrap').style.display = 'block';
@@ -614,78 +272,31 @@ document.getElementById('downloadBtn').addEventListener('click', ()=>{
   URL.revokeObjectURL(url);
 });
 
-/* ================= PUBLISH TO GITHUB ================= */
 function setStatus(html, type){
   document.getElementById('publishStatus').innerHTML = `<div class="status-msg ${type}">${html}</div>`;
 }
 
-function authHeaders(auth){
-  return {
-    'Authorization': `Bearer ${auth.token}`,
-    'Accept': 'application/vnd.github+json'
-  };
-}
-
-async function githubErrorMessage(res, prefix){
-  let detail = '';
-  try{
-    const data = await res.json();
-    detail = data.message || '';
-  }catch(e){}
-  if(res.status === 401) detail = 'Token inválido o vencido.';
-  if(res.status === 403) detail = detail || 'Sin permisos suficientes en el repositorio (revisa el scope del token).';
-  if(res.status === 404) detail = 'No encontré ese repositorio, rama o archivo. Revisa usuario/repo/ruta.';
-  return `${prefix}: ${detail} (código ${res.status})`;
-}
-
 document.getElementById('publishBtn').addEventListener('click', async ()=>{
   const auth = getAuth();
-  if(!auth){
-    showLogin();
-    return;
-  }
+  if(!auth){ ghShowLogin(); return; }
   const codeBlock = document.getElementById('codeOutput').textContent;
-  if(!codeBlock){
-    alert('Genera la entrada primero.');
-    return;
-  }
+  if(!codeBlock){ alert('Genera la entrada primero.'); return; }
 
   const publishBtn = document.getElementById('publishBtn');
   publishBtn.disabled = true;
   setStatus('Conectando con GitHub...', 'info');
 
   try{
-    const apiBase = `https://api.github.com/repos/${auth.owner}/${auth.repo}/contents/${auth.path}`;
-
-    const getRes = await fetch(`${apiBase}?ref=${encodeURIComponent(auth.branch)}`, {
-      headers: authHeaders(auth)
-    });
-    if(!getRes.ok) throw new Error(await githubErrorMessage(getRes, 'No pude leer el archivo de posts'));
-    const fileData = await getRes.json();
-    const currentContent = base64ToUtf8(fileData.content);
+    const { content, sha, apiBase } = await fetchPostsFile(auth);
 
     const marker = 'const POSTS = [';
-    const idx = currentContent.indexOf(marker);
-    if(idx === -1){
-      throw new Error(`No encontré "${marker}" dentro de ${auth.path}. Revisa que la ruta configurada sea la correcta.`);
-    }
+    const idx = content.indexOf(marker);
+    if(idx === -1) throw new Error(`No encontré "${marker}" dentro de ${auth.path}. Revisa la ruta configurada.`);
     const insertPos = idx + marker.length;
-    const updatedContent = currentContent.slice(0, insertPos) + '\n' + codeBlock + currentContent.slice(insertPos);
+    const updatedContent = content.slice(0, insertPos) + '\n' + codeBlock + content.slice(insertPos);
 
     const title = document.getElementById('f-title').value.trim() || 'sin título';
-    const putRes = await fetch(apiBase, {
-      method: 'PUT',
-      headers: {...authHeaders(auth), 'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        message: `Nuevo post: ${title}`,
-        content: utf8ToBase64(updatedContent),
-        sha: fileData.sha,
-        branch: auth.branch
-      })
-    });
-    if(!putRes.ok) throw new Error(await githubErrorMessage(putRes, 'No pude guardar los cambios'));
-    const putData = await putRes.json();
-    const commitUrl = putData.commit && putData.commit.html_url ? putData.commit.html_url : null;
+    const commitUrl = await putPostsFile(auth, apiBase, updatedContent, sha, `Nuevo post: ${title}`);
 
     setStatus(
       `Publicado. El commit ya está en tu repo — GitHub Pages puede tardar uno o dos minutos en reconstruir el sitio antes de que se vea en línea.` +
@@ -700,5 +311,7 @@ document.getElementById('publishBtn').addEventListener('click', async ()=>{
 });
 </script>
 
+</body>
+</html>
 </body>
 </html>
