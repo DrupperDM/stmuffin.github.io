@@ -8,7 +8,9 @@
   consultar la skin ACTUAL de una cuenta (por username o UUID). Por eso:
 
   - "MI SKIN ACTUAL" se resuelve sola: pones tu UUID o tu username abajo
-    y el visor 3D la carga automáticamente.
+    y el visor 3D la carga automáticamente. Prueba varios proveedores
+    (mc-heads, minotar, crafatar) en orden y usa el primero que responda,
+    así que si uno está caído no se rompe todo.
   - "ÚLTIMAS SKINS" NO se puede traer sola de tu cuenta — la vas
     llenando tú a mano en recentSkins de aquí abajo. Cada vez que
     cambies de skin, guarda el archivo .png (Minecraft lo guarda
@@ -34,25 +36,41 @@ const MINECRAFT_CONFIG = {
   ]
 };
 
-async function resolveMinecraftSkinUrl(uuidRaw, username){
-  let uuid = (uuidRaw || '').replace(/-/g,'').trim();
-
-  if(!uuid && username){
+async function firstWorkingImageUrl(candidateBaseUrls){
+  for(const base of candidateBaseUrls){
+    const testUrl = base + (base.includes('?') ? '&' : '?') + 'v=' + Date.now();
     try{
-      const res = await fetch(`https://api.mojang.com/users/profiles/minecraft/${encodeURIComponent(username)}`);
-      if(!res.ok) throw new Error('username no encontrado');
-      const data = await res.json();
-      uuid = data.id;
+      const res = await fetch(testUrl, { method: 'GET', mode: 'cors', cache: 'no-store' });
+      if(res.ok) return testUrl;
     }catch(e){
-      return { error: 'No pude resolver tu username automáticamente (puede ser un bloqueo de CORS del navegador). Escribe tu UUID directamente en minecraft-skin.js — es más confiable.' };
+      // este proveedor falló (caído, CORS, lo que sea) — se prueba el siguiente
     }
   }
+  return null;
+}
 
-  if(!uuid){
+async function resolveMinecraftSkinUrl(uuidRaw, username){
+  const identifier = (uuidRaw || '').replace(/-/g,'').trim() || (username || '').trim();
+
+  if(!identifier){
     return { error: 'Falta configurar tu UUID o username en minecraft-skin.js.' };
   }
 
-  return { url: `https://crafatar.com/skins/${uuid}?v=${Date.now()}`, uuid };
+  // Varios proveedores conocidos que aceptan username o UUID directamente.
+  // Si uno está caído (pasa de vez en cuando, son servicios gratuitos),
+  // se prueba el siguiente automáticamente.
+  const candidates = [
+    `https://mc-heads.net/skin/${identifier}`,
+    `https://minotar.net/skin/${identifier}`,
+    `https://crafatar.com/skins/${identifier}`,
+  ];
+
+  const working = await firstWorkingImageUrl(candidates);
+  if(!working){
+    return { error: 'No pude cargar tu skin desde ningún proveedor (probé varios). Puede ser un corte temporal de esos servicios — intenta de nuevo en un rato, o revisa que tu username/UUID esté bien escrito.' };
+  }
+
+  return { url: working };
 }
 
 async function initMinecraftSkinViewer(){
@@ -101,10 +119,12 @@ async function initMinecraftSkinViewer(){
     entries.forEach(entry=>{
       let thumbUrl = entry.skin;
       let swapUrl = entry.skin;
+      let fallbackThumb = '';
       if(!thumbUrl && entry.uuid){
         const cleanUuid = entry.uuid.replace(/-/g,'');
-        thumbUrl = `https://crafatar.com/renders/body/${cleanUuid}?scale=6&overlay`;
-        swapUrl = `https://crafatar.com/skins/${cleanUuid}`;
+        thumbUrl = `https://mc-heads.net/body/${cleanUuid}/40`;
+        fallbackThumb = `https://crafatar.com/renders/body/${cleanUuid}?scale=6&overlay`;
+        swapUrl = `https://mc-heads.net/skin/${cleanUuid}`;
       }
       if(!thumbUrl) return;
 
@@ -113,7 +133,7 @@ async function initMinecraftSkinViewer(){
       card.className = 'mc-recent-card';
       card.dataset.skin = swapUrl;
       card.innerHTML = `
-        <img src="${thumbUrl}" alt="${entry.label || 'skin anterior'}">
+        <img src="${thumbUrl}" alt="${entry.label || 'skin anterior'}" ${fallbackThumb ? `onerror="this.onerror=null;this.src='${fallbackThumb}';"` : ''}>
         <span class="mc-recent-label">${entry.label || 'Sin nombre'}</span>
         ${entry.date ? `<span class="mc-recent-date">${entry.date}</span>` : ''}
       `;
@@ -127,5 +147,4 @@ if(window.skinview3d){
 }else{
   window.addEventListener('skinview3d-ready', initMinecraftSkinViewer, { once: true });
 }
-
 initMinecraftSkinViewer();
