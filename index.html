@@ -85,6 +85,20 @@
 
 <div class="divider"><span class="mark">◆</span></div>
 
+<section id="minecraft">
+  <h2><span class="mark">*</span> MI SKIN DE MINECRAFT</h2>
+  <div class="mc-viewer-wrap">
+    <canvas id="mc-canvas" width="300" height="380"></canvas>
+    <div class="upload-status" id="mc-status" style="text-align:center;"></div>
+    <p class="mc-hint">arrastra para rotar · rueda del mouse para acercar</p>
+  </div>
+
+  <h3 class="mc-sub-title">ÚLTIMAS SKINS</h3>
+  <div class="mc-recent-grid" id="mc-recent-grid"></div>
+</section>
+
+<div class="divider"><span class="mark">◆</span></div>
+
 <section>
   <div class="ribbon-box">
     <h3>ENCUÉNTRAME POR AQUÍ</h3>
@@ -159,11 +173,8 @@ const obs = new IntersectionObserver((entries)=>{
 sections.forEach(s=>obs.observe(s));
 </script>
 
-</body>
-</html>
-
-</body>
-</html>
+<script src="https://cdn.jsdelivr.net/npm/skinview3d@3.4.1/bundles/skinview3d.bundle.js"></script>
+<script src="minecraft-skin.js"></script>
 
 </body>
 </html>
