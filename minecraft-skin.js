@@ -23,7 +23,7 @@
 */
 
 const MINECRAFT_CONFIG = {
-  currentUuid: '', // ej: '069a79f4-44e9-4726-a5be-fca90e38aaf5' (con o sin guiones)
+  currentUuid: '56f913ad-4c5d-4e62-9ccc-880192379117', // ej: '069a79f4-44e9-4726-a5be-fca90e38aaf5' (con o sin guiones)
   currentUsername: 'StaryMuffin', // se usa solo si currentUuid está vacío
 
   recentSkins: [
