@@ -122,4 +122,10 @@ async function initMinecraftSkinViewer(){
   }
 }
 
+if(window.skinview3d){
+  initMinecraftSkinViewer();
+}else{
+  window.addEventListener('skinview3d-ready', initMinecraftSkinViewer, { once: true });
+}
+
 initMinecraftSkinViewer();
