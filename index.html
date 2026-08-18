@@ -173,7 +173,11 @@ const obs = new IntersectionObserver((entries)=>{
 sections.forEach(s=>obs.observe(s));
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/skinview3d@3.4.1/bundles/skinview3d.bundle.js"></script>
+<script type="module">
+  import * as skinview3d from "https://cdn.jsdelivr.net/npm/skinview3d@3.4.2/+esm";
+  window.skinview3d = skinview3d;
+  window.dispatchEvent(new Event('skinview3d-ready'));
+</script>
 <script src="minecraft-skin.js"></script>
 
 </body>
