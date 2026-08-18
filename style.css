@@ -209,15 +209,6 @@ footer .copy{font-size:10px;color:var(--dim);letter-spacing:.5px;line-height:1.7
 .discord-text strong{color:var(--white);letter-spacing:.5px;}
 .discord-sub{font-size:10px;color:var(--dim);word-break:break-all;}
 
-/* ---------- comentarios (GraphComment) ---------- */
-.pd-comments-block{margin-top:48px;}
-.pd-comments-block .divider{margin-bottom:26px;}
-.pd-comments-block h2{font-family:var(--pixel);font-size:14px;letter-spacing:1px;color:var(--white);margin-bottom:22px;text-align:center;}
-.pd-comments-block h2 .mark{color:var(--gold);}
-.comments-panel{border:1px solid var(--border);background:var(--panel);padding:20px;}
-#graphcomment{max-width:100%;min-height:80px;}
-.comments-notice{font-size:11px;line-height:1.8;color:var(--dim);border:1px dashed var(--border);padding:14px 16px;text-align:center;}
-
 /* ---------- NSFW blur ---------- */
 .nsfw-wrap{position:relative;overflow:hidden;}
 .nsfw-img{filter:blur(26px) saturate(.6);transform:scale(1.08);transition:filter .25s ease, transform .25s ease;display:block;}
@@ -350,3 +341,16 @@ footer .copy{font-size:10px;color:var(--dim);letter-spacing:.5px;line-height:1.7
 .danger-box p{font-size:12px;line-height:1.8;color:var(--dim);max-width:440px;margin:0 auto 22px;}
 .btn-danger{font-family:var(--pixel);font-size:10px;letter-spacing:.5px;color:#ff6b6b;background:transparent;border:1px solid #ff6b6b;padding:12px 18px;cursor:pointer;transition:background .15s,color .15s;}
 .btn-danger:hover{background:#ff6b6b;color:#1a0000;}
+
+/* ================= MINECRAFT SKIN VIEWER ================= */
+.mc-viewer-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:44px;}
+#mc-canvas{border:1px solid var(--border);background:var(--panel);cursor:grab;max-width:100%;}
+#mc-canvas:active{cursor:grabbing;}
+.mc-hint{font-size:9px;color:var(--dim);letter-spacing:.5px;}
+.mc-sub-title{font-family:var(--pixel);font-size:12px;color:var(--gold);text-align:center;margin-bottom:18px;letter-spacing:1px;}
+.mc-recent-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:14px;max-width:560px;margin:0 auto;}
+.mc-recent-card{display:flex;flex-direction:column;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--border);padding:14px 8px;cursor:pointer;transition:border-color .15s;}
+.mc-recent-card:hover{border-color:var(--gold);}
+.mc-recent-card img{width:64px;height:auto;image-rendering:pixelated;}
+.mc-recent-label{font-size:9px;color:var(--white);text-align:center;letter-spacing:.5px;}
+.mc-recent-date{font-size:8px;color:var(--gold);}
