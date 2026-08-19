@@ -29,7 +29,7 @@ const MINECRAFT_CONFIG = {
   // los proveedores externos por completo. Es la opción más confiable:
   // sube tu skin .png a images/ (con new-post.html, por ejemplo) y pon
   // aquí la ruta, ej: 'images/mi-skin.png'.
-  currentSkinUrl: '',
+  currentSkinUrl: 'images/mi-skin.png',
 
   currentUuid: '56f913ad-4c5d-4e62-9ccc-880192379117', // ej: '069a79f4-44e9-4726-a5be-fca90e38aaf5' (con o sin guiones)
   currentUsername: 'StaryMuffin', // se usa solo si currentUuid está vacío
