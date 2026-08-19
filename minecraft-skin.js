@@ -39,6 +39,9 @@ const MINECRAFT_CONFIG = {
     //   skin: ruta a un PNG que subiste tú (para skins que ya no están activas)
     //   uuid: si esa skin sigue siendo la actual de algún UUID
     // { label: 'Skin de verano', date: '2026-06', skin: 'images/skin-verano.png' },
+    { label: 'Skin Vanilla', date: '2026-07', skin: 'images/skin1.png' },
+    { label: 'Skin Emperador', date: '2026-06', skin: 'images/skin2.png' },
+    { label: 'Skin Creador', date: '2026-05', skin: 'images/skip3.png' }
   ]
 };
 
