@@ -25,6 +25,12 @@
 */
 
 const MINECRAFT_CONFIG = {
+  // Si la pones, se usa DIRECTO y se ignoran currentUuid/currentUsername y
+  // los proveedores externos por completo. Es la opción más confiable:
+  // sube tu skin .png a images/ (con new-post.html, por ejemplo) y pon
+  // aquí la ruta, ej: 'images/mi-skin.png'.
+  currentSkinUrl: '',
+
   currentUuid: '', // ej: '069a79f4-44e9-4726-a5be-fca90e38aaf5' (con o sin guiones)
   currentUsername: 'StaryMuffin', // se usa solo si currentUuid está vacío
 
@@ -36,41 +42,37 @@ const MINECRAFT_CONFIG = {
   ]
 };
 
-async function firstWorkingImageUrl(candidateBaseUrls){
-  for(const base of candidateBaseUrls){
-    const testUrl = base + (base.includes('?') ? '&' : '?') + 'v=' + Date.now();
-    try{
-      const res = await fetch(testUrl, { method: 'GET', mode: 'cors', cache: 'no-store' });
-      if(res.ok) return testUrl;
-    }catch(e){
-      // este proveedor falló (caído, CORS, lo que sea) — se prueba el siguiente
-    }
+async function resolveMinecraftSkinUrl(directUrl, uuidRaw, username){
+  if(directUrl && directUrl.trim()){
+    return { url: directUrl.trim(), source: 'directo (currentSkinUrl)' };
   }
-  return null;
-}
 
-async function resolveMinecraftSkinUrl(uuidRaw, username){
   const identifier = (uuidRaw || '').replace(/-/g,'').trim() || (username || '').trim();
 
   if(!identifier){
-    return { error: 'Falta configurar tu UUID o username en minecraft-skin.js.' };
+    return { error: 'Falta configurar tu UUID, username o currentSkinUrl en minecraft-skin.js.' };
   }
 
   // Varios proveedores conocidos que aceptan username o UUID directamente.
   // Si uno está caído (pasa de vez en cuando, son servicios gratuitos),
   // se prueba el siguiente automáticamente.
   const candidates = [
-    `https://mc-heads.net/skin/${identifier}`,
-    `https://minotar.net/skin/${identifier}`,
-    `https://crafatar.com/skins/${identifier}`,
+    { url: `https://mc-heads.net/skin/${identifier}`, name: 'mc-heads.net' },
+    { url: `https://minotar.net/skin/${identifier}`, name: 'minotar.net' },
+    { url: `https://crafatar.com/skins/${identifier}`, name: 'crafatar.com' },
   ];
 
-  const working = await firstWorkingImageUrl(candidates);
-  if(!working){
-    return { error: 'No pude cargar tu skin desde ningún proveedor (probé varios). Puede ser un corte temporal de esos servicios — intenta de nuevo en un rato, o revisa que tu username/UUID esté bien escrito.' };
+  for(const candidate of candidates){
+    const testUrl = candidate.url + '?v=' + Date.now();
+    try{
+      const res = await fetch(testUrl, { method: 'GET', mode: 'cors', cache: 'no-store' });
+      if(res.ok) return { url: testUrl, source: candidate.name };
+    }catch(e){
+      // este proveedor falló (caído, CORS, lo que sea) — se prueba el siguiente
+    }
   }
 
-  return { url: working };
+  return { error: 'No pude cargar tu skin desde ningún proveedor (probé varios). Puede ser un corte temporal de esos servicios — intenta de nuevo en un rato, o revisa que tu username/UUID esté bien escrito.' };
 }
 
 async function initMinecraftSkinViewer(){
@@ -79,7 +81,7 @@ async function initMinecraftSkinViewer(){
   const grid = document.getElementById('mc-recent-grid');
   if(!canvas) return;
 
-  const result = await resolveMinecraftSkinUrl(MINECRAFT_CONFIG.currentUuid, MINECRAFT_CONFIG.currentUsername);
+  const result = await resolveMinecraftSkinUrl(MINECRAFT_CONFIG.currentSkinUrl, MINECRAFT_CONFIG.currentUuid, MINECRAFT_CONFIG.currentUsername);
 
   if(result.error){
     if(statusEl){
@@ -97,7 +99,10 @@ async function initMinecraftSkinViewer(){
     viewer.autoRotateSpeed = 0.6;
     viewer.animation = new skinview3d.WalkingAnimation();
     viewer.zoom = 0.85;
-    if(statusEl){ statusEl.textContent = ''; statusEl.className = 'upload-status'; }
+    if(statusEl){
+      statusEl.innerHTML = `cargada desde ${result.source} — <a href="${result.url}" target="_blank" rel="noopener" style="color:var(--gold);">ver imagen ↗</a>`;
+      statusEl.className = 'upload-status info';
+    }
 
     if(grid){
       grid.addEventListener('click', (e)=>{
@@ -147,4 +152,3 @@ if(window.skinview3d){
 }else{
   window.addEventListener('skinview3d-ready', initMinecraftSkinViewer, { once: true });
 }
-initMinecraftSkinViewer();
