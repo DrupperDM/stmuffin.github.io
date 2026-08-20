@@ -344,15 +344,41 @@ footer .copy{font-size:10px;color:var(--dim);letter-spacing:.5px;line-height:1.7
 
 /* ================= MINECRAFT SKIN VIEWER ================= */
 .mc-viewer-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:44px;}
-#mc-canvas{border:1px solid var(--border);background:var(--panel);cursor:grab;max-width:100%;}
+
+.mc-stage-lg{position:relative;display:inline-block;}
+.mc-stage-lg::before{
+  content:"";position:absolute;left:50%;top:-10%;width:170%;height:120%;
+  transform:translateX(-50%);
+  background:radial-gradient(ellipse at center 30%, rgba(255,204,34,.22) 0%, rgba(255,204,34,.07) 40%, transparent 68%);
+  pointer-events:none;z-index:0;
+}
+#mc-canvas{position:relative;z-index:1;border:1px solid var(--border);background:var(--panel);cursor:grab;max-width:100%;box-shadow:0 0 50px 6px rgba(255,204,34,.10);}
 #mc-canvas:active{cursor:grabbing;}
+.mc-pedestal-lg{
+  position:absolute;left:50%;bottom:-10px;width:62%;height:26px;transform:translateX(-50%);
+  background:radial-gradient(ellipse at center, rgba(255,204,34,.55) 0%, rgba(255,204,34,.15) 55%, transparent 75%);
+  filter:blur(3px);pointer-events:none;z-index:2;
+}
+
 .mc-hint{font-size:9px;color:var(--dim);letter-spacing:.5px;}
 .mc-sub-title{font-family:var(--pixel);font-size:12px;color:var(--gold);text-align:center;margin-bottom:18px;letter-spacing:1px;}
 .mc-recent-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px;max-width:620px;margin:0 auto;}
 .mc-recent-card{display:flex;flex-direction:column;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--border);padding:14px 8px;cursor:pointer;transition:border-color .15s;}
 .mc-recent-card:hover{border-color:var(--gold);}
-.mc-mini-stage{display:block;width:110px;height:150px;}
-.mc-mini-canvas{width:110px;height:150px;display:block;background:var(--bg);pointer-events:none;}
-.mc-mini-static{width:64px;height:auto;image-rendering:pixelated;}
+
+.mc-mini-stage{position:relative;display:block;width:110px;height:150px;}
+.mc-mini-stage::before{
+  content:"";position:absolute;left:50%;top:-8%;width:180%;height:110%;
+  transform:translateX(-50%);
+  background:radial-gradient(ellipse at center 30%, rgba(255,204,34,.20) 0%, rgba(255,204,34,.05) 42%, transparent 68%);
+  pointer-events:none;z-index:0;
+}
+.mc-mini-canvas{position:relative;z-index:1;width:110px;height:150px;display:block;background:var(--bg);pointer-events:none;}
+.mc-pedestal-sm{
+  position:absolute;left:50%;bottom:6px;width:66%;height:14px;transform:translateX(-50%);
+  background:radial-gradient(ellipse at center, rgba(255,204,34,.5) 0%, rgba(255,204,34,.12) 55%, transparent 75%);
+  filter:blur(2px);pointer-events:none;z-index:2;
+}
+.mc-mini-static{position:relative;z-index:1;width:64px;height:auto;image-rendering:pixelated;}
 .mc-recent-label{font-size:9px;color:var(--white);text-align:center;letter-spacing:.5px;}
 .mc-recent-date{font-size:8px;color:var(--gold);}
