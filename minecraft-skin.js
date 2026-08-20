@@ -29,9 +29,9 @@ const MINECRAFT_CONFIG = {
   // los proveedores externos por completo. Es la opción más confiable:
   // sube tu skin .png a images/ (con new-post.html, por ejemplo) y pon
   // aquí la ruta, ej: 'images/mi-skin.png'.
-  currentSkinUrl: 'images/mi-skin.png',
+  currentSkinUrl: '',
 
-  currentUuid: '56f913ad-4c5d-4e62-9ccc-880192379117', // ej: '069a79f4-44e9-4726-a5be-fca90e38aaf5' (con o sin guiones)
+  currentUuid: '', // ej: '069a79f4-44e9-4726-a5be-fca90e38aaf5' (con o sin guiones)
   currentUsername: 'StaryMuffin', // se usa solo si currentUuid está vacío
 
   recentSkins: [
@@ -39,9 +39,6 @@ const MINECRAFT_CONFIG = {
     //   skin: ruta a un PNG que subiste tú (para skins que ya no están activas)
     //   uuid: si esa skin sigue siendo la actual de algún UUID
     // { label: 'Skin de verano', date: '2026-06', skin: 'images/skin-verano.png' },
-    { label: 'Skin Vanilla', date: '2026-07', skin: 'images/skin1.png' },
-    { label: 'Skin Emperador', date: '2026-06', skin: 'images/skin2.png' },
-    { label: 'Skin Creador', date: '2026-05', skin: 'images/skip3.png' }
   ]
 };
 
@@ -124,29 +121,68 @@ async function initMinecraftSkinViewer(){
       return;
     }
     grid.innerHTML = '';
-    entries.forEach(entry=>{
-      let thumbUrl = entry.skin;
-      let swapUrl = entry.skin;
-      let fallbackThumb = '';
-      if(!thumbUrl && entry.uuid){
-        const cleanUuid = entry.uuid.replace(/-/g,'');
-        thumbUrl = `https://mc-heads.net/body/${cleanUuid}/40`;
-        fallbackThumb = `https://crafatar.com/renders/body/${cleanUuid}?scale=6&overlay`;
-        swapUrl = `https://mc-heads.net/skin/${cleanUuid}`;
-      }
-      if(!thumbUrl) return;
+    entries.forEach(entry => buildRecentSkinCard(grid, entry));
+  }
+}
 
-      const card = document.createElement('button');
-      card.type = 'button';
-      card.className = 'mc-recent-card';
-      card.dataset.skin = swapUrl;
-      card.innerHTML = `
-        <img src="${thumbUrl}" alt="${entry.label || 'skin anterior'}" ${fallbackThumb ? `onerror="this.onerror=null;this.src='${fallbackThumb}';"` : ''}>
-        <span class="mc-recent-label">${entry.label || 'Sin nombre'}</span>
-        ${entry.date ? `<span class="mc-recent-date">${entry.date}</span>` : ''}
-      `;
-      grid.appendChild(card);
-    });
+async function buildRecentSkinCard(grid, entry){
+  let thumbUrl = entry.skin;
+  let swapUrl = entry.skin;
+  let fallbackThumb = '';
+  if(!thumbUrl && entry.uuid){
+    const cleanUuid = entry.uuid.replace(/-/g,'');
+    thumbUrl = `https://mc-heads.net/body/${cleanUuid}/40`;
+    fallbackThumb = `https://crafatar.com/renders/body/${cleanUuid}?scale=6&overlay`;
+    swapUrl = `https://mc-heads.net/skin/${cleanUuid}`;
+  }
+  if(!thumbUrl) return;
+
+  const label = entry.label || 'Sin nombre';
+  const canvasId = 'mc-mini-' + Math.random().toString(36).slice(2);
+
+  const card = document.createElement('button');
+  card.type = 'button';
+  card.className = 'mc-recent-card';
+  card.dataset.skin = swapUrl;
+  card.innerHTML = `
+    <span class="mc-mini-stage"><canvas class="mc-mini-canvas" id="${canvasId}" width="110" height="150"></canvas></span>
+    <span class="mc-recent-label">${label}</span>
+    ${entry.date ? `<span class="mc-recent-date">${entry.date}</span>` : ''}
+  `;
+  grid.appendChild(card);
+
+  // Estilo "vitrina" (como las presentaciones de Minecraft Live): un
+  // modelo 3D pequeño girando solo. Si algo falla (librería no
+  // disponible, skin no carga), cae a una imagen estática en su lugar.
+  if(window.skinview3d){
+    const canvasEl = document.getElementById(canvasId);
+    try{
+      const miniViewer = new skinview3d.SkinViewer({ canvas: canvasEl, width: 110, height: 150 });
+      await miniViewer.loadSkin(swapUrl || thumbUrl);
+      miniViewer.autoRotate = true;
+      miniViewer.autoRotateSpeed = 1.1;
+      miniViewer.zoom = 0.9;
+      if(miniViewer.controls){
+        miniViewer.controls.enableRotate = false;
+        miniViewer.controls.enableZoom = false;
+        miniViewer.controls.enablePan = false;
+      }
+      return;
+    }catch(err){
+      // sigue abajo al respaldo estático
+    }
+  }
+
+  const canvasEl = document.getElementById(canvasId);
+  if(canvasEl){
+    const img = document.createElement('img');
+    img.className = 'mc-mini-static';
+    img.src = thumbUrl;
+    img.alt = label;
+    if(fallbackThumb){
+      img.onerror = ()=>{ img.onerror = null; img.src = fallbackThumb; };
+    }
+    canvasEl.replaceWith(img);
   }
 }
 
