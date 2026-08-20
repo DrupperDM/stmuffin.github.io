@@ -29,7 +29,7 @@ const MINECRAFT_CONFIG = {
   // los proveedores externos por completo. Es la opción más confiable:
   // sube tu skin .png a images/ (con new-post.html, por ejemplo) y pon
   // aquí la ruta, ej: 'images/mi-skin.png'.
-  currentSkinUrl: 'images/mi-skin.png',
+  currentSkinUrl: '',
 
   currentUuid: '', // ej: '069a79f4-44e9-4726-a5be-fca90e38aaf5' (con o sin guiones)
   currentUsername: 'StaryMuffin', // se usa solo si currentUuid está vacío
@@ -39,9 +39,6 @@ const MINECRAFT_CONFIG = {
     //   skin: ruta a un PNG que subiste tú (para skins que ya no están activas)
     //   uuid: si esa skin sigue siendo la actual de algún UUID
     // { label: 'Skin de verano', date: '2026-06', skin: 'images/skin-verano.png' },
-    { label: 'Skin Vanilla', date: '2026-08', skin: 'images/skin1.png' },
-    { label: 'Skin Dictador', date: '2026-07', skin: 'images/skin2.png' },
-    { label: 'Skin Creador', date: '2026-06', skin: 'images/skin3.png' },
   ]
 };
 
@@ -148,7 +145,7 @@ async function buildRecentSkinCard(grid, entry){
   card.className = 'mc-recent-card';
   card.dataset.skin = swapUrl;
   card.innerHTML = `
-    <span class="mc-mini-stage"><canvas class="mc-mini-canvas" id="${canvasId}" width="110" height="150"></canvas></span>
+    <span class="mc-mini-stage"><canvas class="mc-mini-canvas" id="${canvasId}" width="110" height="150"></canvas><span class="mc-pedestal-sm"></span></span>
     <span class="mc-recent-label">${label}</span>
     ${entry.date ? `<span class="mc-recent-date">${entry.date}</span>` : ''}
   `;
