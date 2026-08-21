@@ -251,7 +251,8 @@ function initFileInsert(){
     if(getYoutubeId(url)) hint.textContent = '✔ Video de YouTube — se insertará centrado.';
     else if(isTwitterUrl(url)) hint.textContent = '✔ Publicación de Twitter/X.';
     else if(isDiscordInvite(url)) hint.textContent = '✔ Invitación de Discord.';
-    else hint.textContent = 'No lo reconozco como YouTube, Twitter/X o Discord — se insertará como texto normal.';
+    else if(getSpotifyEmbed(url)) hint.textContent = '✔ Spotify — se insertará como reproductor.';
+    else hint.textContent = 'No lo reconozco como YouTube, Twitter/X, Discord o Spotify — se insertará como texto normal.';
   });
 
   document.getElementById('insertLinkBtn').addEventListener('click', ()=>{
@@ -285,6 +286,19 @@ function wrapSelection(prefix, suffix){
   ta.setSelectionRange(newPos, newPos);
 }
 
+function insertHeading(hashes){
+  const placeholder = 'Escribe tu título aquí';
+  const pos = contentField.selectionStart;
+  const before = contentField.value.slice(0, pos);
+  const after = contentField.value.slice(pos);
+  const prefix = `\n\n${hashes} `;
+  contentField.value = before + prefix + placeholder + '\n\n' + after;
+  const selStart = before.length + prefix.length;
+  const selEnd = selStart + placeholder.length;
+  contentField.focus();
+  contentField.setSelectionRange(selStart, selEnd);
+}
+
 function initFormatToolbar(){
   document.getElementById('fmtBold').addEventListener('click', ()=> wrapSelection('**','**'));
   document.getElementById('fmtUnderline').addEventListener('click', ()=> wrapSelection('__','__'));
@@ -292,6 +306,8 @@ function initFormatToolbar(){
     const color = document.getElementById('fmtColorPicker').value;
     wrapSelection(`[color=${color}]`, '[/color]');
   });
+  document.getElementById('fmtHeading').addEventListener('click', ()=> insertHeading('##'));
+  document.getElementById('fmtSubheading').addEventListener('click', ()=> insertHeading('###'));
 }
 
 function initPostEditor(){
