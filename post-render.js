@@ -6,13 +6,16 @@
   vistas previas).
 
   SINTAXIS DENTRO DE "content" (cada bloque separado por una línea en blanco):
-  - Imagen:            ![texto alternativo](ruta)
-  - Imagen NSFW:        ![nsfw:texto alternativo](ruta)
-  - Archivo:            [archivo](ruta)  o  [archivo:Etiqueta](ruta)
+  - Título:              ## Texto del título
+  - Subtítulo:           ### Texto del subtítulo
+  - Imagen:              ![texto alternativo](ruta)
+  - Imagen NSFW:         ![nsfw:texto alternativo](ruta)
+  - Archivo:             [archivo](ruta)  o  [archivo:Etiqueta](ruta)
                          (se detecta solo si es audio, texto u otro)
-  - Enlace suelto:       https://... (YouTube, Twitter/X o Discord se
-                         convierten en video/tweet/tarjeta automáticamente)
-  - Texto:              **negrita**, __subrayado__, [color=#hex]texto[/color]
+  - Enlace suelto:       https://... (YouTube, Twitter/X, Discord o
+                         Spotify se convierten en video/tweet/tarjeta/
+                         reproductor automáticamente)
+  - Texto:               **negrita**, __subrayado__, [color=#hex]texto[/color]
 */
 
 function formatDate(iso){
@@ -70,6 +73,18 @@ function isDiscordInvite(url){
   }catch(e){ return false; }
 }
 
+function getSpotifyEmbed(url){
+  try{
+    const u = new URL(url);
+    if(u.hostname.replace(/^www\./,'') !== 'open.spotify.com') return null;
+    const parts = u.pathname.split('/').filter(Boolean);
+    const types = ['track','album','playlist','episode','show','artist'];
+    const idx = parts.findIndex(p => types.includes(p));
+    if(idx === -1 || !parts[idx+1]) return null;
+    return { type: parts[idx], id: parts[idx+1].split('?')[0] };
+  }catch(e){ return null; }
+}
+
 /* ---------- texto enriquecido ---------- */
 function parseInline(text){
   text = text.replace(/\*\*([\s\S]+?)\*\*/g, '<strong>$1</strong>');
@@ -114,6 +129,11 @@ function renderDiscordEmbed(url){
     <span class="discord-icon">DC</span>
     <span class="discord-text"><strong>Únete al servidor de Discord</strong><span class="discord-sub">${label}</span></span>
   </a></div>`;
+}
+
+function renderSpotifyEmbed(type, id){
+  const height = type === 'track' ? 152 : (type === 'episode' || type === 'show') ? 232 : 352;
+  return `<div class="embed-block embed-spotify"><div class="spotify-frame"><iframe src="https://open.spotify.com/embed/${type}/${id}?utm_source=generator" width="100%" height="${height}" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe></div></div>`;
 }
 
 function loadTwitterWidgets(container){
@@ -170,10 +190,22 @@ function loadTextFile(id, path){
   });
 }
 
+/* ---------- títulos ---------- */
+const HEADING_LINE = /^(#{2,3})\s+(.+)$/;
+
 /* ---------- cuerpo completo del post ---------- */
 function renderBody(content, pendingTextFiles){
   return content.split(/\n\s*\n/).map(block=>{
     const trimmed = block.trim();
+
+    const headingMatch = trimmed.match(HEADING_LINE);
+    if(headingMatch){
+      const level = headingMatch[1].length;
+      const text = parseInline(escapeHtml(headingMatch[2]));
+      return level === 2
+        ? `<h3 class="pd-heading-lg">${text}</h3>`
+        : `<h4 class="pd-heading-sm">${text}</h4>`;
+    }
 
     const imgMatch = trimmed.match(IMG_LINE);
     if(imgMatch){
@@ -200,6 +232,8 @@ function renderBody(content, pendingTextFiles){
       if(ytId) return renderYoutubeEmbed(ytId);
       if(isTwitterUrl(url)) return renderTweetEmbed(url);
       if(isDiscordInvite(url)) return renderDiscordEmbed(url);
+      const spotify = getSpotifyEmbed(url);
+      if(spotify) return renderSpotifyEmbed(spotify.type, spotify.id);
     }
 
     return `<p>${parseInline(block.replace(/\n/g,'<br>'))}</p>`;
