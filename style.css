@@ -53,13 +53,13 @@ body{
    (ver font-detect.js), el texto de lectura se agranda un poco —
    esa fuente se ve más chica que el respaldo Press Start 2P al
    mismo tamaño en px. Solo afecta texto, no botones/etiquetas/nav. */
-html.has-determination-sans body{ font-size:15px; }
-html.has-determination-sans .hero p.tagline{ font-size:15px; }
-html.has-determination-sans .page-header p{ font-size:14px; }
-html.has-determination-sans #sobre-mi p{ font-size:16px; }
-html.has-determination-sans .contact-lead{ font-size:14px; }
-html.has-determination-sans .post-card .pc-excerpt{ font-size:14px; }
-html.has-determination-sans .post-detail .pd-body{ font-size:15px; }
+html.has-determination-sans body{ font-size:18px; }
+html.has-determination-sans .hero p.tagline{ font-size:18px; }
+html.has-determination-sans .page-header p{ font-size:22px; }
+html.has-determination-sans #sobre-mi p{ font-size:20px; }
+html.has-determination-sans .contact-lead{ font-size:18px; }
+html.has-determination-sans .post-card .pc-excerpt{ font-size:20px; }
+html.has-determination-sans .post-detail .pd-body{ font-size:20px; }
 
 /* estrellas de fondo */
 #stars{position:fixed;inset:0;z-index:0;pointer-events:none;}
