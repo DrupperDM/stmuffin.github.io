@@ -49,6 +49,18 @@ body{
   overflow-x:hidden;
 }
 
+/* Si el navegador confirmó que Determination Sans cargó de verdad
+   (ver font-detect.js), el texto de lectura se agranda un poco —
+   esa fuente se ve más chica que el respaldo Press Start 2P al
+   mismo tamaño en px. Solo afecta texto, no botones/etiquetas/nav. */
+html.has-determination-sans body{ font-size:15px; }
+html.has-determination-sans .hero p.tagline{ font-size:15px; }
+html.has-determination-sans .page-header p{ font-size:14px; }
+html.has-determination-sans #sobre-mi p{ font-size:16px; }
+html.has-determination-sans .contact-lead{ font-size:14px; }
+html.has-determination-sans .post-card .pc-excerpt{ font-size:14px; }
+html.has-determination-sans .post-detail .pd-body{ font-size:15px; }
+
 /* estrellas de fondo */
 #stars{position:fixed;inset:0;z-index:0;pointer-events:none;}
 .star{position:absolute;width:2px;height:2px;background:var(--white);opacity:.4;animation:twinkle 3s infinite ease-in-out;}
@@ -214,9 +226,9 @@ footer .copy{font-size:10px;color:var(--dim);letter-spacing:.5px;line-height:1.7
 .spotify-frame iframe{width:100%;display:block;border-radius:4px;}
 
 /* ---------- títulos dentro del contenido ---------- */
-.pd-body .pd-heading-lg{font-family:var(--pixel);font-size:16px;letter-spacing:1px;color:var(--gold);margin:34px 0 16px;text-shadow:2px 2px 0 var(--gold-dim);}
+.pd-body .pd-heading-lg{font-family:var(--pixel);font-size:22px;letter-spacing:1px;color:var(--gold);text-align:center;margin:34px 0 16px;text-shadow:2px 2px 0 var(--gold-dim);}
 .pd-body .pd-heading-lg:first-child{margin-top:0;}
-.pd-body .pd-heading-sm{font-family:var(--pixel);font-size:12px;letter-spacing:.5px;color:var(--white);margin:26px 0 12px;}
+.pd-body .pd-heading-sm{font-family:var(--pixel);font-size:16px;letter-spacing:.5px;color:var(--white);text-align:center;margin:26px 0 12px;}
 .pd-body .pd-heading-sm:first-child{margin-top:0;}
 
 /* ---------- NSFW blur ---------- */
@@ -257,11 +269,12 @@ footer .copy{font-size:10px;color:var(--dim);letter-spacing:.5px;line-height:1.7
 .field label{display:block;font-size:10px;letter-spacing:.5px;color:var(--gold);margin-bottom:8px;}
 .field input[type="text"],
 .field input[type="date"],
+.field select,
 .field textarea{
   width:100%;background:var(--panel);border:1px solid var(--border);color:var(--white);
   font-family:var(--pixel);font-size:12px;line-height:1.8;padding:12px 14px;outline:none;
 }
-.field input:focus,.field textarea:focus{border-color:var(--gold);}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold);}
 .field textarea{resize:vertical;min-height:90px;}
 .field .hint{font-size:9px;color:var(--dim);margin-top:6px;line-height:1.6;}
 
