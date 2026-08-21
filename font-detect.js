@@ -21,7 +21,7 @@
 (function(){
   function applyFontClass(){
     try{
-      if(document.fonts && document.fonts.check && document.fonts.check("24px 'Determination Sans'")){
+      if(document.fonts && document.fonts.check && document.fonts.check("12px 'Determination Sans'")){
         document.documentElement.classList.add('has-determination-sans');
       }
     }catch(e){
