@@ -95,6 +95,17 @@
     <input type="text" id="f-tags" placeholder="universidad, codigo, random">
   </div>
 
+  <div class="field">
+    <label for="f-font">TIPOGRAFÍA DEL POST (opcional)</label>
+    <select id="f-font">
+      <option value="">Pixel (por defecto — igual al resto de la página)</option>
+      <option value="terminal">Terminal (VT323)</option>
+      <option value="legible">Clásica legible (serif)</option>
+      <option value="moderna">Moderna (sans-serif)</option>
+    </select>
+    <div class="hint">* solo cambia el texto del post — los títulos y etiquetas siempre se ven con la tipografía pixel de la página.</div>
+  </div>
+
   <!-- ---------- PORTADA ---------- -->
   <div class="field">
     <label>IMAGEN DE PORTADA (opcional)</label>
@@ -229,6 +240,7 @@ document.getElementById('genBtn').addEventListener('click', ()=>{
   const title = document.getElementById('f-title').value.trim();
   const dateVal = document.getElementById('f-date').value;
   const tagsRaw = document.getElementById('f-tags').value.trim();
+  const fontVal = document.getElementById('f-font').value;
   const excerpt = document.getElementById('f-excerpt').value.trim();
   const content = document.getElementById('f-content').value.trim();
 
@@ -237,14 +249,14 @@ document.getElementById('genBtn').addEventListener('click', ()=>{
     return;
   }
 
-  const tags = tagsRaw ? tagsRaw.split(',').map(t=>t.trim().toLowerCase()).filter(Boolean) : [];
+  const tags = tagsRaw ? tagsRaw.split(',').map(t=>t.trim()).filter(Boolean) : [];
   const slug = slugify(title);
 
-  const code = buildPostObjectCode({slug, title, date: dateVal, tags, cover: coverSrc, coverNsfw, excerpt, content});
+  const code = buildPostObjectCode({slug, title, date: dateVal, tags, cover: coverSrc, coverNsfw, font: fontVal, excerpt, content});
   document.getElementById('codeOutput').textContent = code;
 
   document.getElementById('previewCard').innerHTML = renderPostCardInner({
-    title, date: dateVal, tags, excerpt, cover: coverSrc, coverNsfw
+    title, date: dateVal, tags, excerpt, cover: coverSrc, coverNsfw, font: fontVal
   });
 
   document.getElementById('publishStatus').innerHTML = '';
