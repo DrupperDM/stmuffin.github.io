@@ -263,17 +263,18 @@ function removePostObject(content, objects, targetSlug){
 }
 
 /* ---------- construir el código de un post ---------- */
-function buildPostObjectCode({slug, title, date, tags, cover, coverNsfw, excerpt, content}){
+function buildPostObjectCode({slug, title, date, tags, cover, coverNsfw, font, excerpt, content}){
   const tagsCode = '[' + tags.map(t => jsStringLiteral(t)).join(', ') + ']';
   const contentCode = jsStringLiteral(content.replace(/\r\n/g,'\n'));
   const coverLine = cover ? `\n    cover: ${jsStringLiteral(cover)},` : '';
   const coverNsfwLine = (cover && coverNsfw) ? `\n    coverNsfw: true,` : '';
+  const fontLine = font ? `\n    font: ${jsStringLiteral(font)},` : '';
 
   return `  {
     slug: ${jsStringLiteral(slug)},
     title: ${jsStringLiteral(title)},
     date: ${jsStringLiteral(date)},
-    tags: ${tagsCode},${coverLine}${coverNsfwLine}
+    tags: ${tagsCode},${coverLine}${coverNsfwLine}${fontLine}
     excerpt: ${jsStringLiteral(excerpt)},
     content: ${contentCode}
   },`;
