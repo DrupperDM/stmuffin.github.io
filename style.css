@@ -62,8 +62,9 @@ nav{
   background:rgba(0,0,0,.92);
   border-bottom:1px solid var(--border);
 }
-.nav-logo{font-family:var(--pixel);font-size:12px;letter-spacing:1px;color:var(--white);text-decoration:none;}
+.nav-logo{font-family:var(--pixel);font-size:12px;letter-spacing:1px;color:var(--white);text-decoration:none;display:inline-flex;align-items:center;gap:8px;}
 .nav-logo .heart{color:#e0413f;}
+.nav-avatar{width:22px;height:22px;object-fit:cover;border:1px solid var(--border);image-rendering:pixelated;flex:none;}
 .nav-links{display:flex;flex-wrap:wrap;gap:16px;list-style:none;}
 .nav-links a{font-family:var(--pixel);font-size:10px;letter-spacing:.5px;color:var(--dim);text-decoration:none;transition:color .15s;}
 .nav-links a:hover,.nav-links a.active{color:var(--gold);}
