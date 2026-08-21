@@ -240,6 +240,21 @@ function renderBody(content, pendingTextFiles){
   }).join('');
 }
 
+/* ---------- tipografías que se pueden elegir por post ---------- */
+/* El valor guardado en post.font es una de estas claves; los títulos,
+   etiquetas y demás elementos de interfaz siempre se quedan en la
+   tipografía pixel de la página — esto solo afecta al texto del post. */
+const POST_FONTS = {
+  terminal: "'VT323', monospace",
+  legible: "Georgia, 'Times New Roman', serif",
+  moderna: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+};
+
+function postFontStyle(fontKey){
+  const family = POST_FONTS[fontKey];
+  return family ? ` style="font-family:${family};"` : '';
+}
+
 /* ---------- tarjeta de post (lista) ---------- */
 function renderPostCardInner(post){
   const coverHtml = post.cover
@@ -252,7 +267,7 @@ function renderPostCardInner(post){
         <span class="pc-title">${post.title}</span>
         <span class="pc-date">${formatDate(post.date)}</span>
       </div>
-      <div class="pc-excerpt">${post.excerpt}</div>
+      <div class="pc-excerpt"${postFontStyle(post.font)}>${post.excerpt}</div>
       <div class="pc-tags">${(post.tags||[]).map(t=>`<span class="pill">${t}</span>`).join('')}</div>
     </div>
   `;
