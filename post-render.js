@@ -268,7 +268,10 @@ function renderPostCardInner(post){
         <span class="pc-date">${formatDate(post.date)}</span>
       </div>
       <div class="pc-excerpt"${postFontStyle(post.font)}>${post.excerpt}</div>
-      <div class="pc-tags">${(post.tags||[]).map(t=>`<span class="pill">${t}</span>`).join('')}</div>
+      <div class="pc-tags">
+        ${(post.tags||[]).map(t=>`<span class="pill">${t}</span>`).join('')}
+        <span class="pc-more">LEER MÁS →</span>
+      </div>
     </div>
   `;
 }
