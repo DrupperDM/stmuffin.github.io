@@ -209,6 +209,15 @@ footer .copy{font-size:10px;color:var(--dim);letter-spacing:.5px;line-height:1.7
 .discord-text strong{color:var(--white);letter-spacing:.5px;}
 .discord-sub{font-size:10px;color:var(--dim);word-break:break-all;}
 
+.spotify-frame{width:100%;max-width:500px;margin:0 auto;}
+.spotify-frame iframe{width:100%;display:block;border-radius:4px;}
+
+/* ---------- títulos dentro del contenido ---------- */
+.pd-body .pd-heading-lg{font-family:var(--pixel);font-size:16px;letter-spacing:1px;color:var(--gold);margin:34px 0 16px;text-shadow:2px 2px 0 var(--gold-dim);}
+.pd-body .pd-heading-lg:first-child{margin-top:0;}
+.pd-body .pd-heading-sm{font-family:var(--pixel);font-size:12px;letter-spacing:.5px;color:var(--white);margin:26px 0 12px;}
+.pd-body .pd-heading-sm:first-child{margin-top:0;}
+
 /* ---------- NSFW blur ---------- */
 .nsfw-wrap{position:relative;overflow:hidden;}
 .nsfw-img{filter:blur(26px) saturate(.6);transform:scale(1.08);transition:filter .25s ease, transform .25s ease;display:block;}
