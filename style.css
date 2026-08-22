@@ -83,8 +83,8 @@ nav{
 }
 .nav-logo{font-family:var(--pixel);font-size:16px;letter-spacing:1px;color:var(--white);text-decoration:none;display:inline-flex;align-items:center;gap:8px;}
 .nav-logo .heart{color:#e0413f;}
-.nav-avatar-wrap{position:relative;width:22px;height:22px;flex:none;display:inline-block;}
-.nav-avatar-wrap .nav-avatar{position:absolute;top:0;left:0;width:22px;height:22px;object-fit:cover;border:1px solid var(--border);border-radius:50%;transition:opacity .15s ease;}
+.nav-avatar-wrap{position:relative;width:40px;height:40px;flex:none;display:inline-block;}
+.nav-avatar-wrap .nav-avatar{position:absolute;top:0;left:0;width:40px;height:40px;object-fit:cover;border:1px solid var(--border);border-radius:50%;transition:opacity .15s ease;}
 .nav-avatar-wrap .nav-avatar-hover{opacity:0;}
 .nav-logo:hover .nav-avatar-normal{opacity:0;}
 .nav-logo:hover .nav-avatar-hover{opacity:1;}
