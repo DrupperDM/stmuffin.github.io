@@ -94,9 +94,10 @@ function renderList(filterTag){
     return;
   }
 
-  items.forEach(post=>{
+  items.forEach((post, i)=>{
     const card = document.createElement('button');
-    card.className = 'post-card';
+    card.className = 'post-card pd-enter';
+    card.style.animationDelay = (i * 0.04) + 's';
     card.innerHTML = renderPostCardInner(post);
     card.addEventListener('click', ()=> openPost(post.slug));
     postList.appendChild(card);
@@ -135,6 +136,9 @@ function closeDetail(){
   history.replaceState(null,'',location.pathname);
   detailView.style.display = 'none';
   listView.style.display = 'block';
+  const activeTag = tagFilters.querySelector('.tag-btn.active');
+  renderList(activeTag ? activeTag.dataset.tag : 'all');
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 detailView.addEventListener('click', (e)=>{
