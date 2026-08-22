@@ -21,7 +21,7 @@
 function formatDate(iso){
   const d = new Date(iso + 'T00:00:00');
   const meses = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
-  return meses[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+  return d.getDate() + ' ' + meses[d.getMonth()] + ' ' + d.getFullYear();
 }
 
 function escapeHtml(s){
