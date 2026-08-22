@@ -23,19 +23,23 @@
 </nav>
 
 <section class="hero" id="inicio">
-  <div class="souls"><div class="soul"></div><div class="soul"></div><div class="soul"></div></div>
-  <h1> STARY <span class="heart">♥</span> MUFFIN </h1>
-  <div class="chapter-tag">ESTUDIANTE DE ING. SOFTWARE</div>
-  <p class="tagline">* alguien ha aparecido. Todavía no sabe muy bien qué está haciendo, pero va aprendiendo por el camino.</p>
+  <div class="souls pd-enter" style="animation-delay:.8s;"><div class="soul"></div><div class="soul"></div><div class="soul"></div></div>
+  <h1 class="title-reveal">
+    <span class="title-chunk" style="animation-delay:0s;">STA</span><span class="title-chunk" style="animation-delay:.1s;">RY</span>
+    <span class="heart title-chunk" style="animation-delay:.18s;">♥</span>
+    <span class="title-chunk" style="animation-delay:.26s;">MU</span><span class="title-chunk" style="animation-delay:.34s;">FFIN</span>
+  </h1>
+  <div class="chapter-tag pd-enter" style="animation-delay:.86s;">ESTUDIANTE DE ING. SOFTWARE</div>
+  <p class="tagline pd-enter" style="animation-delay:.92s;">* alguien ha aparecido. Todavía no sabe muy bien qué está haciendo, pero va aprendiendo por el camino.</p>
 
-  <div class="badge-row">
+  <div class="badge-row pd-enter" style="animation-delay:.98s;">
     <div class="badge"><div class="icon">JS</div><span class="label">CÓDIGO</span></div>
     <div class="badge"><div class="icon">☕</div><span class="label">CAFÉ</span></div>
     <div class="badge"><div class="icon">📚</div><span class="label">TAREAS</span></div>
     <div class="badge"><div class="icon">🐞</div><span class="label">BUGS</span></div>
   </div>
 
-  <div class="scroll-hint">▼ desplázate para continuar</div>
+  <div class="scroll-hint pd-enter" style="animation-delay:1.04s;">▼ desplázate para continuar</div>
 </section>
 
 <div class="divider"><span class="mark">◆</span></div>
@@ -190,6 +194,21 @@ const obs = new IntersectionObserver((entries)=>{
   });
 },{rootMargin:'-40% 0px -50% 0px'});
 sections.forEach(s=>obs.observe(s));
+
+const revealSections = document.querySelectorAll('section:not(.hero)');
+const revealObs = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      const children = Array.from(entry.target.children);
+      children.forEach((el, i)=>{
+        el.classList.add('pd-enter');
+        el.style.animationDelay = (i * 0.05) + 's';
+      });
+      revealObs.unobserve(entry.target);
+    }
+  });
+},{threshold:0.15});
+revealSections.forEach(s=>revealObs.observe(s));
 </script>
 
 <script type="module">
