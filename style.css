@@ -103,6 +103,17 @@ nav{
 .hero h1{font-family:var(--pixel);font-size:clamp(20px,6vw,40px);letter-spacing:3px;color:var(--white);text-shadow:4px 4px 0 var(--gold-dim);}
 .hero h1 .heart{color:#e0413f;text-shadow:none;}
 
+@keyframes titlePop{
+  0%{opacity:0;transform:scale(.4) translateY(10px);}
+  60%{opacity:1;transform:scale(1.08) translateY(0);}
+  100%{opacity:1;transform:scale(1) translateY(0);}
+}
+.title-chunk{
+  display:inline-block;
+  opacity:0;
+  animation:titlePop .4s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+
 .chapter-tag{display:inline-block;margin-top:18px;padding:6px 14px;border:3px solid var(--border);font-size:10px;letter-spacing:1px;color:var(--gold);}
 
 .hero p.tagline{margin-top:20px;font-size:13px;line-height:1.9;color:var(--dim);max-width:440px;margin-left:auto;margin-right:auto;}
