@@ -118,12 +118,12 @@ function openPost(slug){
   const bodyHtml = renderBody(post.content, pendingTextFiles);
 
   detailView.innerHTML = `
-    <a class="back-link" href="blog.html">&larr; volver al blog</a>
-    <h1>${post.title}</h1>
-    <div class="pd-meta">${formatDate(post.date)}</div>
-    <div class="pd-tags">${(post.tags||[]).map(t=>`<span class="pill">${t}</span>`).join('')}</div>
-    ${coverHtml}
-    <div class="pd-body"${postFontStyle(post.font)}>${bodyHtml}</div>
+    <a class="back-link pd-enter" href="blog.html" style="animation-delay:0s;">&larr; volver al blog</a>
+    <h1 class="pd-enter" style="animation-delay:.04s;">${post.title}</h1>
+    <div class="pd-meta pd-enter" style="animation-delay:.08s;">${formatDate(post.date)}</div>
+    <div class="pd-tags pd-enter" style="animation-delay:.12s;">${(post.tags||[]).map(t=>`<span class="pill">${t}</span>`).join('')}</div>
+    <div class="pd-enter" style="animation-delay:.16s;">${coverHtml}</div>
+    <div class="pd-body pd-enter" style="animation-delay:.2s;"${postFontStyle(post.font)}>${bodyHtml}</div>
   `;
 
   pendingTextFiles.forEach(({id, path}) => loadTextFile(id, path));
